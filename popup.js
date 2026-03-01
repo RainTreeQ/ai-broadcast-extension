@@ -230,6 +230,10 @@ sendBtn.addEventListener('click', async () => {
       // Clear the input box on full success
       messageInput.value = '';
       setTimeout(() => { updateSendButton(); }, 1500);
+      // 新建窗口后同步刷新会话列表标题
+      if (newChat) {
+        setTimeout(() => loadTabs(), 800);
+      }
     } else {
       updateSendButton();
     }

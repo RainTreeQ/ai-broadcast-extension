@@ -186,6 +186,10 @@ export default function Popup() {
       if (successCount === results.length && results.length > 0) {
         setMessageText('')
         if (messageInputRef.current) messageInputRef.current.value = ''
+        // 新建窗口后同步刷新会话列表标题（给新页面一点时间更新 DOM 标题）
+        if (newChat) {
+          setTimeout(() => loadTabs(), 800)
+        }
       }
 
       console.log(`[AIB][popup][${summary.requestId}] summary`, summary)
@@ -195,7 +199,7 @@ export default function Popup() {
     } finally {
       setSending(false)
     }
-  }, [messageText, selectedTabIds, autoSend, newChat, aiTabs, addStatus, clearStatus])
+  }, [messageText, selectedTabIds, autoSend, newChat, aiTabs, addStatus, clearStatus, loadTabs])
 
   const handleKeyDown = useCallback(
     (e) => {
