@@ -158,8 +158,16 @@ export function Hero() {
           </motion.p>
         </div>
 
-        <motion.div variants={scaleIn} className="mt-16 mx-auto max-w-5xl">
-          <HeroProductMock />
+        <motion.div
+          variants={scaleIn}
+          className="mt-16 mx-auto max-w-5xl rounded-2xl border border-border bg-card overflow-hidden shadow-[0_24px_48px_-12px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.08)]"
+          style={{ boxShadow: "0 24px 48px -12px color-mix(in oklch, var(--foreground) 12%, transparent), inset 0 1px 0 color-mix(in oklch, white 10%, transparent)" }}
+        >
+          <img
+            src="/screenshot.png"
+            alt="AI Broadcast 扩展：ChatGPT、Claude、Gemini 三端同步 Hello World 与 Broadcast 面板"
+            className="w-full h-auto object-contain block"
+          />
         </motion.div>
       </motion.div>
     </section>
