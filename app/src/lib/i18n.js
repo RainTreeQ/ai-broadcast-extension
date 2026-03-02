@@ -45,9 +45,26 @@ const FALLBACK_MESSAGES = {
   },
 }
 
+const SUPPORTED_LOCALES = ['zh_CN', 'en']
+
 function normalizeLocale(raw) {
   const value = String(raw || '').toLowerCase()
   if (value.startsWith('zh')) return 'zh_CN'
+  return 'en'
+}
+
+/** 按浏览器「首选语言」列表的第一顺位决定 locale（与设置页 Preferred languages 一致） */
+function getPreferredLocale() {
+  if (typeof navigator === 'undefined') return 'en'
+  const list = navigator.languages && navigator.languages.length > 0
+    ? navigator.languages
+    : navigator.language
+      ? [navigator.language]
+      : ['en']
+  for (const lang of list) {
+    const locale = normalizeLocale(lang)
+    if (SUPPORTED_LOCALES.includes(locale)) return locale
+  }
   return 'en'
 }
 
@@ -57,18 +74,9 @@ function applySubstitutions(template, substitutions) {
   return subs.reduce((acc, s, idx) => acc.replaceAll(`$${idx + 1}`, String(s)), template)
 }
 
+/** 使用浏览器第一顺位首选语言（navigator.languages[0]），与设置页 Preferred languages 一致 */
 export function t(key, substitutions) {
-  try {
-    if (typeof chrome !== 'undefined' && chrome.i18n?.getMessage) {
-      const msg = chrome.i18n.getMessage(key, substitutions)
-      if (msg) return msg
-    }
-  } catch (_) {
-    // ignore
-  }
-
-  const locale =
-    typeof navigator !== 'undefined' && navigator.language ? normalizeLocale(navigator.language) : 'en'
+  const locale = getPreferredLocale()
   const dict = FALLBACK_MESSAGES[locale] || FALLBACK_MESSAGES.en
   const template = dict[key] || FALLBACK_MESSAGES.en[key] || String(key)
   return applySubstitutions(template, substitutions)
