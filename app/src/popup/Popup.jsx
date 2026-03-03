@@ -217,9 +217,9 @@ export default function Popup() {
   )
 
   return (
-    <div className="relative flex min-h-[520px] w-[380px] overflow-hidden bg-gray-50 text-gray-900 dark:bg-zinc-900 dark:text-gray-100 font-sans">
+    <div className="relative flex min-h-[520px] w-[380px] overflow-hidden bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-gray-100 font-sans">
       <div className="absolute inset-x-0 top-0 z-30">
-        <header className="flex h-[60px] items-center justify-between border-b border-gray-200 bg-white px-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <header className="flex h-[60px] items-center justify-between border-b border-gray-200 bg-gray-50 px-5 dark:border-zinc-700/80 dark:bg-zinc-950">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-black text-white shadow-[0_4px_12px_rgba(0,0,0,0.12)] dark:bg-zinc-300 dark:text-zinc-900 [--logo-divider:#000] dark:[--logo-divider:theme(colors.zinc.300)]">
               <LogoIcon className="h-4 w-4" />
@@ -237,7 +237,7 @@ export default function Popup() {
           </button>
         </header>
 
-        <div className="flex h-[44px] items-center justify-between bg-gray-50 px-5 dark:bg-zinc-900">
+        <div className="flex h-[44px] items-center justify-between bg-gray-50 px-5 dark:bg-zinc-950">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-zinc-500">
             {t('active_sessions')}
           </span>
@@ -252,7 +252,7 @@ export default function Popup() {
       </div>
 
       <div className="absolute inset-0 overflow-hidden">
-        <div className="h-full space-y-3 overflow-y-auto px-4 pt-[114px] pb-[198px] scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-200 dark:scrollbar-thumb-zinc-700">
+        <div className="popup-scroll-area h-full space-y-3 overflow-y-auto px-4 pt-[114px] pb-[198px] scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-200 dark:scrollbar-thumb-zinc-600">
           {tabsLoading ? (
             <div className="flex items-center justify-center gap-2 rounded-xl px-4 py-8 text-sm text-gray-400 dark:text-zinc-500">
               <span
@@ -281,7 +281,7 @@ export default function Popup() {
                     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), toggleTab(tab.id))}
                     className={`group relative flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-200 ${
                       selected
-                        ? 'bg-white shadow-sm ring-1 ring-black/30 dark:bg-zinc-800 dark:ring-white/30'
+                        ? 'bg-white shadow-sm ring-1 ring-gray-200/90 dark:bg-zinc-800 dark:ring-zinc-600/55'
                         : 'border border-transparent hover:bg-gray-100 dark:hover:bg-zinc-800/50'
                     }`}
                   >
@@ -332,11 +332,11 @@ export default function Popup() {
 
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-28 bg-gradient-to-t from-gray-50/98 via-gray-50/72 to-transparent dark:from-zinc-900/98 dark:via-zinc-900/72"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-36 bg-gradient-to-t from-gray-50/98 via-gray-50/72 to-transparent dark:from-zinc-950/98 dark:via-zinc-950/72"
         />
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-4">
-          <div className="pointer-events-auto rounded-2xl bg-white/92 shadow-[0_8px_28px_-12px_rgba(0,0,0,0.3)] ring-1 ring-gray-100/90 backdrop-blur-xl transition-all focus-within:shadow-[0_12px_30px_-12px_rgba(0,0,0,0.35)] dark:bg-zinc-800/90 dark:ring-zinc-700/60 dark:shadow-[0_10px_30px_-14px_rgba(0,0,0,0.65)] dark:focus-within:shadow-[0_14px_34px_-14px_rgba(0,0,0,0.7)]">
+          <div className="pointer-events-auto rounded-2xl bg-zinc-50/92 shadow-[0_8px_28px_-12px_rgba(0,0,0,0.3)] ring-1 ring-gray-200/95 backdrop-blur-xl transition-all focus-within:shadow-[0_12px_30px_-12px_rgba(0,0,0,0.35)] dark:bg-zinc-700/70 dark:ring-zinc-500/70 dark:shadow-[0_10px_30px_-14px_rgba(0,0,0,0.65)] dark:focus-within:shadow-[0_14px_34px_-14px_rgba(0,0,0,0.7)]">
             <textarea
               ref={messageInputRef}
               className="min-h-[72px] w-full max-h-[160px] resize-none bg-transparent px-4 pt-3.5 text-[13px] leading-relaxed text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100 dark:placeholder:text-zinc-500"

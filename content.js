@@ -506,23 +506,132 @@ if (!window.__aiBroadcastLoaded) {
 
       'grok.com': {
         name: 'Grok',
-        findInput: () => waitFor(() =>
-          document.querySelector('textarea[placeholder*="Ask"]') ||
-          document.querySelector('textarea') ||
-          document.querySelector('div[contenteditable="true"]')
-        ),
+        findInput: () => waitFor(() => {
+          const candidates = [
+            ...document.querySelectorAll('textarea[placeholder]'),
+            ...document.querySelectorAll('textarea'),
+            ...document.querySelectorAll('div[contenteditable="true"][role="textbox"]'),
+            ...document.querySelectorAll('div[contenteditable="true"]')
+          ];
+
+          const isVisible = (el) => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            const rect = el.getBoundingClientRect();
+            return rect.width > 120 && rect.height > 20 && rect.bottom > 0;
+          };
+
+          const scoreInput = (el) => {
+            if (!el || el.disabled || el.readOnly || !isVisible(el)) return -1;
+            const rect = el.getBoundingClientRect();
+            const placeholder = (el.getAttribute('placeholder') || '').toLowerCase();
+            const root = el.closest('form') || el.parentElement || document;
+            let score = 0;
+            if (placeholder.includes('ask') || placeholder.includes('mind') || placeholder.includes('message')) score += 6;
+            if (el.closest('form')) score += 4;
+            if (root.querySelector?.('button[type="submit"], button[aria-label*="Submit"], button[aria-label*="Send"], button[data-testid*="send"]')) score += 4;
+            if (rect.top > 40 && rect.top < window.innerHeight) score += 2;
+            score += Math.min(4, Math.round(rect.width / 300));
+            return score;
+          };
+
+          let best = null;
+          let bestScore = -1;
+          for (const candidate of candidates) {
+            const score = scoreInput(candidate);
+            if (score > bestScore) {
+              bestScore = score;
+              best = candidate;
+            }
+          }
+          return bestScore >= 0 ? best : null;
+        }),
         async inject(el, text, options) {
           if (el.tagName === 'TEXTAREA') return setReactValue(el, text);
           return setContentEditable(el, text, options);
         },
-        async send() {
-          const btn = await waitFor(() => {
-            const found = document.querySelector('button[type="submit"]') ||
-                          document.querySelector('button[aria-label*="Send"]');
-            return found && !found.disabled ? found : null;
-          }, 2000, 40);
-          if (btn) btn.click();
-          else pressEnterOn(null);
+        async send(el, options) {
+          const logger = options?.logger;
+          const selectors = [
+            'button[type="submit"]:not([disabled])',
+            'button[aria-label="Submit"]:not([disabled])',
+            'button[aria-label*="Submit"]:not([disabled])',
+            'button[aria-label*="Send"]:not([disabled])',
+            'button[data-testid*="send"]:not([disabled])'
+          ];
+
+          const isVisible = (node) => {
+            if (!node) return false;
+            const style = window.getComputedStyle(node);
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            const rect = node.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0 && rect.bottom > 0;
+          };
+
+          const roots = () => {
+            const list = [
+              el?.closest('form'),
+              el?.parentElement,
+              el?.closest('div[class*="input"]'),
+              el?.closest('main'),
+              document
+            ].filter(Boolean);
+            const uniq = [];
+            const seen = new Set();
+            for (const root of list) {
+              if (seen.has(root)) continue;
+              seen.add(root);
+              uniq.push(root);
+            }
+            return uniq;
+          };
+
+          const tryFindBtn = () => {
+            for (const root of roots()) {
+              for (const selector of selectors) {
+                const found = root.querySelector?.(selector);
+                if (found && isVisible(found)) return found;
+              }
+              const buttons = root.querySelectorAll ? root.querySelectorAll('button:not([disabled])') : [];
+              for (const button of buttons) {
+                if (!isVisible(button)) continue;
+                const hint = `${button.getAttribute('aria-label') || ''} ${button.getAttribute('title') || ''} ${button.getAttribute('data-testid') || ''} ${(button.textContent || '').trim()}`.toLowerCase();
+                if (hint.includes('submit') || hint.includes('send')) return button;
+              }
+            }
+            return null;
+          };
+
+          const btn = await waitFor(tryFindBtn, 3500, 40);
+          if (btn) {
+            btn.click();
+            return;
+          }
+
+          const target = el || document.activeElement;
+          if (!target) {
+            pressEnterOn(null);
+            return;
+          }
+          const before = normalizeText(getContent(target));
+          target.focus();
+          pressEnterOn(target);
+          await sleep(220);
+          const after = normalizeText(getContent(target));
+          if (before && after === before) {
+            target.dispatchEvent(new KeyboardEvent('keydown', {
+              key: 'Enter',
+              code: 'Enter',
+              keyCode: 13,
+              which: 13,
+              bubbles: true,
+              cancelable: true,
+              composed: true,
+              ctrlKey: true
+            }));
+            logger?.debug('grok-send-ctrl-enter-fallback');
+          }
         }
       },
 
@@ -600,7 +709,7 @@ if (!window.__aiBroadcastLoaded) {
         const logger = createLogger(requestId, debug);
         const platform = getPlatform();
         if (!platform) {
-          sendResponse({ success: false, sendMs: 0 });
+          sendResponse({ success: false, sendMs: 0, error: '不支持的平台' });
           return true;
         }
         (async () => {
@@ -608,14 +717,14 @@ if (!window.__aiBroadcastLoaded) {
           try {
             const input = await platform.findInput();
             if (!input) {
-              sendResponse({ success: false, sendMs: now() - t0 });
+              sendResponse({ success: false, sendMs: now() - t0, error: '找不到输入框' });
               return;
             }
             await platform.send(input, { logger, debug });
             sendResponse({ success: true, sendMs: now() - t0 });
           } catch (e) {
             logger.error('send-now-failure', { error: e?.message });
-            sendResponse({ success: false, sendMs: now() - t0 });
+            sendResponse({ success: false, sendMs: now() - t0, error: e?.message || '发送失败' });
           }
         })();
         return true;
@@ -699,6 +808,7 @@ if (!window.__aiBroadcastLoaded) {
             sendResponse({
               success: true,
               platform: platform.name,
+              sent: autoSend,
               timings,
               strategy,
               fallbackUsed
@@ -717,6 +827,7 @@ if (!window.__aiBroadcastLoaded) {
             sendResponse({
               success: false,
               platform: platform.name,
+              sent: false,
               error: err.message,
               stage: failedStage,
               timings,

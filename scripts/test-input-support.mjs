@@ -41,6 +41,7 @@ const PLATFORMS = [
     name: 'Grok',
     url: 'https://grok.com/',
     selectors: [
+      'textarea[placeholder*="mind"]',
       'textarea[placeholder*="Ask"]',
       'textarea',
       'div[contenteditable="true"]',

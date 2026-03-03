@@ -154,6 +154,7 @@ const NEW_CHAT_URLS = {
   'Qianwen':  'https://www.qianwen.com/',
   'Kimi':     'https://www.kimi.com/',
 };
+const NEW_CHAT_SETTLE_DELAY_MS = 260;
 
 function getPlatformName(url) {
   try {
@@ -473,15 +474,14 @@ async function broadcastToTabs(payload) {
         if (newUrl) {
           await chrome.tabs.update(tabId, { url: newUrl });
           await waitForTabLoad(tabId);
-          await sleep(800);
+          await sleep(NEW_CHAT_SETTLE_DELAY_MS);
         }
       }
       await ensureContentReady(tabId, requestId, debug, logger);
-      const injectOnly = autoSend;
       const response = await chrome.tabs.sendMessage(tabId, {
         type: 'INJECT_MESSAGE',
         text,
-        autoSend: injectOnly ? false : autoSend,
+        autoSend,
         newChat: false,
         requestId,
         debug,
@@ -489,6 +489,38 @@ async function broadcastToTabs(payload) {
       });
       const merged = { tabId, ...response };
       merged.timings = normalizeResultTimings(merged, now() - tabStartedAt);
+
+      if (autoSend) {
+        const needsSendFallback = merged.success ? merged.sent !== true : merged.stage === 'send';
+        if (needsSendFallback) {
+          const fallbackStartedAt = now();
+          try {
+            const sendRes = await chrome.tabs.sendMessage(tabId, {
+              type: 'SEND_NOW',
+              requestId,
+              debug
+            });
+            const sendMs = Number.isFinite(sendRes?.sendMs) ? sendRes.sendMs : (now() - fallbackStartedAt);
+            const sendOk = Boolean(sendRes?.success);
+            merged.sendFallbackUsed = true;
+            merged.success = sendOk;
+            merged.sent = sendOk;
+            merged.stage = sendOk ? undefined : 'send';
+            merged.error = sendOk ? undefined : (sendRes?.error || merged.error || '发送失败');
+            merged.timings.sendMs = sendMs;
+            merged.timings.totalMs = (merged.timings.findInputMs || 0) + (merged.timings.injectMs || 0) + sendMs;
+          } catch (sendErr) {
+            const sendMs = now() - fallbackStartedAt;
+            merged.sendFallbackUsed = true;
+            merged.success = false;
+            merged.sent = false;
+            merged.stage = 'send';
+            merged.error = sendErr?.message || String(sendErr);
+            merged.timings.sendMs = sendMs;
+            merged.timings.totalMs = (merged.timings.findInputMs || 0) + (merged.timings.injectMs || 0) + sendMs;
+          }
+        }
+      }
       return merged;
     } catch (err) {
       logger.error('tab-failure', { tabId, error: err.message });
@@ -517,31 +549,6 @@ async function broadcastToTabs(payload) {
       timings: { findInputMs: 0, injectMs: 0, sendMs: 0, totalMs: 0 }
     };
     results.push(res);
-  }
-
-  if (autoSend && results.some(r => r.success)) {
-    const sendStart = now();
-    const sendPromises = results.filter(r => r.success).map(async (r) => {
-      try {
-        const sendRes = await chrome.tabs.sendMessage(r.tabId, {
-          type: 'SEND_NOW',
-          requestId,
-          debug
-        });
-        const sendMs = sendRes?.sendMs ?? (now() - sendStart);
-        if (r.timings) {
-          r.timings.sendMs = sendMs;
-          r.timings.totalMs = (r.timings.findInputMs || 0) + (r.timings.injectMs || 0) + sendMs;
-        }
-        return r;
-      } catch (e) {
-        r.success = false;
-        r.error = e?.message || String(e);
-        r.stage = 'send';
-        return r;
-      }
-    });
-    await Promise.allSettled(sendPromises);
   }
 
   const totalMs = now() - startedAt;

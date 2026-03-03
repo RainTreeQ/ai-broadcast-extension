@@ -19,6 +19,11 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html'),
         popup: path.resolve(__dirname, 'popup.html'),
       },
+      output: {
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name][extname]',
+      },
     },
   },
 })
