@@ -7,6 +7,7 @@
 - Node.js 18+
 - 项目根目录：`npm install`（安装 Playwright 等）
 - `app` 目录：`cd app && npm install`
+- 建议启用 Git hooks：`npm run hooks:install`（提交前会自动构建并暂存 `app/dist/`）
 
 ## 构建与加载扩展
 

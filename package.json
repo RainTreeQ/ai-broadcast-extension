@@ -5,6 +5,7 @@
   "scripts": {
     "build": "npm run build --prefix app",
     "build:icons": "node scripts/build-icons.mjs",
+    "hooks:install": "git config --local core.hooksPath .githooks",
     "release:stage": "npm run build && git add -A app/dist && git status --short -- app/dist",
     "test:input": "node scripts/test-input-support.mjs",
     "test:popup": "node scripts/test-popup-ui.mjs"

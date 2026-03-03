@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+echo "[pre-commit] Building extension bundle..."
+npm run build
+
+echo "[pre-commit] Staging app/dist output..."
+git add -A app/dist
