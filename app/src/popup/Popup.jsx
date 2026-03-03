@@ -237,7 +237,7 @@ export default function Popup() {
           </button>
         </header>
 
-        <div className="flex h-[44px] items-center justify-between border-b border-gray-200 bg-white px-5 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex h-[44px] items-center justify-between bg-gray-50 px-5 dark:bg-zinc-900">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-zinc-500">
             {t('active_sessions')}
           </span>
