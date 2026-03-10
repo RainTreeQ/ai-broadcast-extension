@@ -16,6 +16,7 @@ if (!window.__aiBroadcastLoaded) {
       PING: 'PING',
       SEND_NOW: 'SEND_NOW',
       INJECT_MESSAGE: 'INJECT_MESSAGE',
+      INJECT_IMAGE: 'INJECT_IMAGE',
       HIGHLIGHT_UPLOAD_ENTRY: 'HIGHLIGHT_UPLOAD_ENTRY'
     };
 
@@ -421,23 +422,29 @@ if (!window.__aiBroadcastLoaded) {
     }
 
     async function closeQianwenTaskAssistant() {
-      const tag = document.querySelector('.tagBtn-OADWVI.selected-OsA38F') ||
-        document.querySelector('.operateLine-jbfAd6 .tagBtn-OADWVI.selected-OsA38F');
-      if (tag && tag.textContent && tag.textContent.includes('任务助理')) {
-        const closeIcon = tag.querySelector('[data-icon-type="qwpcicon-close2"]');
-        const target = closeIcon || tag;
-        target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-        target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-        target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-        await sleep(120);
+      // Find selected tag containing "任务助理" text (no hashed class dependency)
+      const allTags = document.querySelectorAll('[class*="tagBtn"][class*="selected"], [class*="tag"][aria-selected="true"]');
+      let tag = null;
+      for (const node of allTags) {
+        if (node.textContent && node.textContent.includes('任务助理')) {
+          tag = node;
+          break;
+        }
       }
+      if (!tag) return;
+      const closeIcon = tag.querySelector('[data-icon-type*="close"]') || tag.querySelector('svg');
+      const target = closeIcon || tag;
+      target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+      target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+      target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      await sleep(120);
     }
 
-    // ── Enter — only keydown, no keypress/keyup ─────────────────────────────
+    // ── Enter — full keydown + keypress + keyup cycle ───────────────────────
     function pressEnterOn(el) {
       const target = el || document.activeElement;
       if (!target) return;
-      target.dispatchEvent(new KeyboardEvent('keydown', {
+      const opts = {
         key: 'Enter',
         code: 'Enter',
         keyCode: 13,
@@ -445,17 +452,83 @@ if (!window.__aiBroadcastLoaded) {
         bubbles: true,
         cancelable: true,
         composed: true
-      }));
+      };
+      target.dispatchEvent(new KeyboardEvent('keydown', opts));
+      target.dispatchEvent(new KeyboardEvent('keypress', opts));
+      target.dispatchEvent(new KeyboardEvent('keyup', opts));
+    }
+
+    // ── Image paste ────────────────────────────────────────────────────────
+    function base64ToBlob(base64, mimeType) {
+      const byteChars = atob(base64);
+      const byteArray = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+      return new Blob([byteArray], { type: mimeType });
+    }
+
+    async function pasteImageToInput(el, base64, mimeType, logger) {
+      const blob = base64ToBlob(base64, mimeType);
+      const ext = mimeType === 'image/png' ? 'png' : mimeType === 'image/webp' ? 'webp' : 'jpg';
+      const file = new File([blob], `image.${ext}`, { type: mimeType, lastModified: Date.now() });
+
+      el.focus();
+      await sleep(50);
+
+      // Strategy 1: Construct paste event with clipboardData
+      try {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        const pasteEvt = new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: dt });
+        el.dispatchEvent(pasteEvt);
+        logger?.debug?.('image-paste-strategy', { strategy: 'clipboardEvent' });
+        await sleep(300);
+        return { success: true, strategy: 'clipboardEvent' };
+      } catch (e) {
+        logger?.debug?.('image-paste-clipboardEvent-failed', { error: e?.message });
+      }
+
+      // Strategy 2: Fallback — dispatch drop event
+      try {
+        const dt2 = new DataTransfer();
+        dt2.items.add(file);
+        const dropEvt = new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt2 });
+        el.dispatchEvent(dropEvt);
+        logger?.debug?.('image-paste-strategy', { strategy: 'drop' });
+        await sleep(300);
+        return { success: true, strategy: 'drop' };
+      } catch (e) {
+        logger?.debug?.('image-paste-drop-failed', { error: e?.message });
+      }
+
+      // Strategy 3: Fallback — trigger file input directly
+      try {
+        const container = el.closest('form') || el.closest('section') || el.parentElement?.parentElement || document;
+        const fileInput = container.querySelector('input[type="file"]') || document.querySelector('input[type="file"]');
+        if (fileInput) {
+          const dt3 = new DataTransfer();
+          dt3.items.add(file);
+          fileInput.files = dt3.files;
+          fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+          logger?.debug?.('image-paste-strategy', { strategy: 'fileInput' });
+          await sleep(300);
+          return { success: true, strategy: 'fileInput' };
+        }
+      } catch (e) {
+        logger?.debug?.('image-paste-fileInput-failed', { error: e?.message });
+      }
+
+      return { success: false, strategy: 'none' };
     }
 
     // ── Platforms ────────────────────────────────────────────────────────────
+    // Qianwen: all selectors use stable attributes (no CSS module hashes)
     const qianwenFindInput = () => waitFor(() => {
       const candidates = [
-        ...document.querySelectorAll('.chatTextarea-DVN_3Y div[contenteditable="true"][data-slate-editor="true"]'),
-        ...document.querySelectorAll('.chatInput-dXdYNh [contenteditable="true"]'),
-        ...document.querySelectorAll('.inputContainer-SHGMBo [contenteditable="true"]'),
-        ...document.querySelectorAll('div[contenteditable="true"][data-slate-editor="true"]'),
-        ...document.querySelectorAll('div[contenteditable="true"][role="textbox"]')
+        ...document.querySelectorAll('div[data-slate-editor="true"][contenteditable="true"]'),
+        ...document.querySelectorAll('div[contenteditable="true"][role="textbox"]'),
+        ...document.querySelectorAll('div[contenteditable="true"]'),
+        ...document.querySelectorAll('textarea[placeholder]'),
+        ...document.querySelectorAll('textarea')
       ];
 
       if (!candidates.length) return null;
@@ -476,24 +549,32 @@ if (!window.__aiBroadcastLoaded) {
         return rect.width > 120 && rect.height > 20 && rect.bottom > 0;
       };
 
+      const hasSendButtonNearby = (node) => {
+        const root = node.closest('form') || node.closest('section') || node.parentElement?.parentElement || document;
+        if (!root?.querySelectorAll) return false;
+        const buttons = root.querySelectorAll('button:not([disabled]), [role="button"]');
+        for (const btn of buttons) {
+          if (btn.disabled || btn.getAttribute('aria-disabled') === 'true') continue;
+          const hint = `${btn.getAttribute('aria-label') || ''} ${btn.getAttribute('title') || ''} ${(btn.textContent || '').trim()}`.toLowerCase();
+          if (hint.includes('发送') || hint.includes('send') || hint.includes('提交') || hint.includes('submit')) return true;
+        }
+        return false;
+      };
+
       const scoreInput = (node) => {
         if (!node || !isVisible(node)) return -1;
-        if (node.getAttribute('contenteditable') !== 'true') return -1;
+        if (node.getAttribute('contenteditable') !== 'true' && node.tagName !== 'TEXTAREA') return -1;
         if (node.getAttribute('aria-disabled') === 'true') return -1;
 
         const rect = node.getBoundingClientRect();
         const role = (node.getAttribute('role') || '').toLowerCase();
         const hasSlate = node.getAttribute('data-slate-editor') === 'true';
-        const container = node.closest('.inputContainer-SHGMBo') || node.closest('.chatInput-dXdYNh') || node.closest('.chatTextarea-DVN_3Y');
-        const root = container || document;
-        const sendButton = root.querySelector?.('.operateBtn-JsB9e2:not(.disabled-ZaDDJC), button[type="submit"]:not([disabled]), button[aria-label*="发送"]:not([disabled]), button[aria-label*="Send"]:not([disabled])') ||
-          document.querySelector('.operateBtn-JsB9e2:not(.disabled-ZaDDJC), button[type="submit"]:not([disabled]), button[aria-label*="发送"]:not([disabled]), button[aria-label*="Send"]:not([disabled])');
 
         let score = 0;
         if (hasSlate) score += 8;
         if (role === 'textbox') score += 4;
-        if (container) score += 5;
-        if (sendButton) score += 5;
+        if (node.tagName === 'TEXTAREA') score += 3;
+        if (hasSendButtonNearby(node)) score += 5;
         if (rect.top > 0 && rect.top < window.innerHeight) score += 2;
         if (rect.bottom > window.innerHeight * 0.45) score += 2;
         score += Math.min(4, Math.round(rect.width / 300));
@@ -512,45 +593,65 @@ if (!window.__aiBroadcastLoaded) {
 
       return bestScore >= 0 ? best : null;
     });
+    async function setQianwenInput(el, text, options) {
+      const { logger } = options || {};
+      el.focus();
+      await sleep(20);
+
+      // Try to access Slate editor instance via React fiber
+      const slateNode = el.closest('[data-slate-editor="true"]') || el;
+      const fiberKey = Object.keys(slateNode).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
+      if (fiberKey) {
+        try {
+          let fiber = slateNode[fiberKey];
+          for (let i = 0; i < 15 && fiber; i++) {
+            const editor = fiber.memoizedProps?.editor || fiber.stateNode?.editor;
+            if (editor && typeof editor.insertText === 'function' && typeof editor.deleteFragment === 'function') {
+              // Use Slate editor API directly
+              try { editor.deleteFragment(); } catch (_) {}
+              editor.insertText(text);
+              el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: text }));
+              if (await verifyContent(el, text)) {
+                return { strategy: 'qianwen-slate-api', fallbackUsed: false };
+              }
+            }
+            fiber = fiber.return;
+          }
+        } catch (_) {}
+      }
+
+      // Fallback: Slate-aware strategies
+      return runStrategies(el, [
+        { name: 'qw-insertText', fallbackUsed: false, run: () => tryInsertText(el, text) },
+        { name: 'qw-beforeinput', fallbackUsed: true, run: () => trySlateBeforeInput(el, text) },
+        { name: 'qw-datatransfer', fallbackUsed: true, run: () => tryDataTransferPaste(el, text) },
+        { name: 'qw-clipboard', fallbackUsed: true, run: () => tryClipboardPaste(el, text) },
+        { name: 'qw-direct-dom', fallbackUsed: true, run: () => tryDirectDom(el, text) }
+      ], logger);
+    }
+
     const qianwenInject = async (el, text, options) => {
       await closeQianwenTaskAssistant();
       if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') return setReactValue(el, text);
-      const { logger, safeMode } = options || {};
-      const isSlate = el.getAttribute('data-slate-editor') === 'true' || Boolean(el.closest('[data-slate-editor="true"]'));
-      if (isSlate) {
-        if (safeMode) {
-          return runStrategies(el, [
-            { name: 'slate-safe-insertText', fallbackUsed: false, run: () => tryInsertText(el, text) },
-            { name: 'slate-safe-beforeinput', fallbackUsed: true, run: () => trySlateBeforeInput(el, text) }
-          ], logger);
-        }
-        return runStrategies(el, [
-          { name: 'slate-insertText', fallbackUsed: false, run: () => tryInsertText(el, text) },
-          { name: 'slate-beforeinput', fallbackUsed: true, run: () => trySlateBeforeInput(el, text) },
-          { name: 'slate-clipboard-paste', fallbackUsed: true, run: () => tryClipboardPaste(el, text) },
-          { name: 'slate-datatransfer-paste', fallbackUsed: true, run: () => tryDataTransferPaste(el, text) }
-        ], logger);
-      }
-      return setContentEditable(el, text, options);
+      return setQianwenInput(el, text, options);
     };
     const qianwenSend = async (el) => {
-      const container = el?.closest('.inputContainer-SHGMBo') || el?.closest('.functionArea-ZVlxpM') || el?.closest('.inputOutWrap-fg2bG9') || document;
+      // Walk up from the input to find the nearest meaningful container (no hashed classes)
+      const container = el?.closest('form') || el?.closest('section') || el?.parentElement?.parentElement || document;
       const isBtnDisabled = (node) => {
         if (!node) return true;
         if (node.disabled) return true;
         if (node.getAttribute('aria-disabled') === 'true') return true;
         const klass = node.className?.toString() || '';
-        return klass.includes('disabled-ZaDDJC') || klass.includes('is-disabled') || klass.includes('disabled');
+        return klass.includes('is-disabled') || klass.includes('disabled');
       };
       const findSendBtn = (root) => {
         if (!root?.querySelectorAll) return null;
-        const nodes = root.querySelectorAll('.operateBtn-JsB9e2, button, [role="button"]');
+        const nodes = root.querySelectorAll('button, [role="button"]');
         for (const node of nodes) {
           if (isBtnDisabled(node)) continue;
-          const klass = node.className?.toString() || '';
           const hint = `${node.getAttribute('aria-label') || ''} ${node.getAttribute('title') || ''} ${(node.textContent || '').trim()}`.toLowerCase();
-          if (hint.includes('登录') || hint.includes('log in') || hint.includes('上传') || hint.includes('attach')) continue;
-          if (klass.includes('operateBtn-JsB9e2')) return node;
+          if (hint.includes('登录') || hint.includes('log in') || hint.includes('上传') || hint.includes('attach') || hint.includes('搜索') || hint.includes('search')) continue;
           if (hint.includes('发送') || hint.includes('send') || hint.includes('提交') || hint.includes('submit')) return node;
         }
         return null;
@@ -582,12 +683,20 @@ if (!window.__aiBroadcastLoaded) {
     const kimiSend = async (el) => {
       const container = el?.closest('form') || el?.closest('div[class*="input"]') || el?.closest('div[class*="chat"]') || document;
       const inContainer = (sel) => container.querySelector && container.querySelector(sel);
-      const btn = await waitFor(() => {
-        const found = inContainer('button[type="submit"]') || inContainer('button[aria-label*="发送"]') ||
-          inContainer('button[aria-label*="Send"]') || inContainer('button') ||
+      const findSendBtn = () => {
+        const explicit = inContainer('button[type="submit"]') || inContainer('button[aria-label*="发送"]') ||
+          inContainer('button[aria-label*="Send"]') ||
           document.querySelector('button[type="submit"]') || document.querySelector('button[aria-label*="发送"]');
-        return found && !found.disabled ? found : null;
-      }, 3500, 40);
+        if (explicit && !explicit.disabled) return explicit;
+        // Heuristic: look for send-like buttons by text/aria
+        const buttons = container.querySelectorAll ? container.querySelectorAll('button:not([disabled]), [role="button"]') : [];
+        for (const b of buttons) {
+          const hint = `${b.getAttribute('aria-label') || ''} ${b.getAttribute('title') || ''} ${(b.textContent || '').trim()}`.toLowerCase();
+          if (hint.includes('发送') || hint.includes('send') || hint.includes('submit') || hint.includes('提交')) return b;
+        }
+        return null;
+      };
+      const btn = await waitFor(findSendBtn, 3500, 40);
       if (btn) btn.click();
       else { el?.focus(); pressEnterOn(el); }
     };
@@ -650,14 +759,24 @@ if (!window.__aiBroadcastLoaded) {
           if (el.tagName === 'TEXTAREA') return setReactValue(el, text);
           return setContentEditable(el, text, options);
         },
-        async send() {
+        async send(el) {
           const btn = await waitFor(() => {
             const found = document.querySelector('[data-testid="send-button"]') ||
                           document.querySelector('button[aria-label="Send prompt"]') ||
-                          document.querySelector('button[aria-label="Send message"]');
+                          document.querySelector('button[aria-label="Send message"]') ||
+                          document.querySelector('button[aria-label*="Send"]');
             return found && !found.disabled ? found : null;
           }, 4000, 40);
-          if (btn) btn.click();
+          if (btn) { btn.click(); return; }
+          // Fallback: try clicking even a disabled-looking send button (some frameworks use aria-disabled)
+          const anyBtn = document.querySelector('[data-testid="send-button"]') ||
+                         document.querySelector('button[aria-label="Send prompt"]') ||
+                         document.querySelector('button[aria-label="Send message"]') ||
+                         document.querySelector('button[aria-label*="Send"]');
+          if (anyBtn) { anyBtn.click(); return; }
+          // Last resort: press Enter on the input element
+          const target = el || document.querySelector('#prompt-textarea') || document.activeElement;
+          if (target) { target.focus(); pressEnterOn(target); }
           else pressEnterOn(null);
         }
       },
@@ -671,7 +790,7 @@ if (!window.__aiBroadcastLoaded) {
           document.querySelector('div[contenteditable="true"]')
         ),
         inject: (el, text, options) => setContentEditable(el, text, options),
-        async send() {
+        async send(el) {
           const btn = await waitFor(() => {
             const candidates = [
               document.querySelector('button[aria-label="Send Message"]'),
@@ -686,11 +805,13 @@ if (!window.__aiBroadcastLoaded) {
             }
             return null;
           }, 4000, 40);
-          if (btn) btn.click();
-          else {
-            const input = document.querySelector('div.ProseMirror[contenteditable="true"]');
-            pressEnterOn(input);
-          }
+          if (btn) { btn.click(); return; }
+          // Fallback: try any send-like button even if disabled
+          const anyBtn = document.querySelector('button[aria-label="Send Message"]') ||
+                         document.querySelector('button[aria-label*="Send"]');
+          if (anyBtn) { anyBtn.click(); return; }
+          const input = el || document.querySelector('div.ProseMirror[contenteditable="true"]');
+          if (input) { input.focus(); pressEnterOn(input); }
         }
       },
 
@@ -939,12 +1060,20 @@ if (!window.__aiBroadcastLoaded) {
         async send(el) {
           const btn = await waitFor(() => {
             const found = document.querySelector('button[type="submit"]') ||
-                          document.querySelector('[aria-label*="send"]') ||
-                          document.querySelector('[aria-label*="Send"]');
+                          document.querySelector('[aria-label*="send" i]') ||
+                          document.querySelector('[aria-label*="Send"]') ||
+                          document.querySelector('button[data-testid*="send"]');
             return found && !found.disabled ? found : null;
-          }, 2000, 40);
-          if (btn) btn.click();
-          else { el?.focus(); pressEnterOn(el); }
+          }, 3000, 40);
+          if (btn) { btn.click(); return; }
+          // Fallback: look for any send-ish button in the form/container
+          const container = el?.closest('form') || el?.closest('div[class*="input"]') || document;
+          const buttons = container.querySelectorAll('button:not([disabled])');
+          for (const b of buttons) {
+            const hint = `${b.getAttribute('aria-label') || ''} ${b.textContent || ''}`.toLowerCase();
+            if (hint.includes('send') || hint.includes('发送')) { b.click(); return; }
+          }
+          if (el) { el.focus(); pressEnterOn(el); }
         }
       },
 
@@ -982,8 +1111,9 @@ if (!window.__aiBroadcastLoaded) {
             return d && !d.disabled ? d : null;
           };
           const btn = tryBtn() || await waitFor(tryBtn, 3000, 30);
-          if (btn) btn.click();
-          else { el?.focus(); pressEnterOn(el); }
+          if (btn) { btn.click(); return; }
+          // Fallback: press Enter on input
+          if (el) { el.focus(); pressEnterOn(el); }
         }
       },
 
@@ -1268,6 +1398,45 @@ if (!window.__aiBroadcastLoaded) {
         return true;
       }
 
+      if (message.type === MESSAGE_TYPES.INJECT_IMAGE) {
+        const requestId = message.requestId || `req_${now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+        const debug = Boolean(message.debug);
+        const logger = createLogger(requestId, debug);
+        const platform = getPlatform();
+        if (!platform) {
+          sendResponse({ success: false, error: '不支持的平台', platform: 'Unknown' });
+          return true;
+        }
+        (async () => {
+          const startedAt = now();
+          try {
+            const riskReason = getHighRiskPageReason();
+            if (riskReason) {
+              sendResponse({ success: false, error: riskReason, platform: platform.name });
+              return;
+            }
+            const input = await platform.findInput();
+            if (!input) {
+              sendResponse({ success: false, error: `找不到 ${platform.name} 输入框`, platform: platform.name });
+              return;
+            }
+            const result = await pasteImageToInput(input, message.imageBase64, message.mimeType || 'image/png', logger);
+            const totalMs = now() - startedAt;
+            sendResponse({
+              success: result.success,
+              platform: platform.name,
+              strategy: result.strategy,
+              totalMs,
+              error: result.success ? undefined : '图片粘贴失败'
+            });
+          } catch (err) {
+            logger.error('inject-image-failure', { error: err?.message });
+            sendResponse({ success: false, error: err?.message || '图片注入失败', platform: platform.name });
+          }
+        })();
+        return true;
+      }
+
       if (message.type === MESSAGE_TYPES.HIGHLIGHT_UPLOAD_ENTRY) {
         const requestId = message.requestId || `req_${now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
         const debug = Boolean(message.debug);
@@ -1421,6 +1590,8 @@ if (!window.__aiBroadcastLoaded) {
 
             if (autoSend) {
               stage = 'send';
+              // Give the framework time to process the injected content and enable the send button
+              await sleep(300);
               const sendStartedAt = now();
               const sendResult = await platform.send(input, { logger, debug, text, safeMode });
               if (sendResult === false) {

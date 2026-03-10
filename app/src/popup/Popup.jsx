@@ -1,7 +1,7 @@
 /* global chrome */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Switch } from '@/components/ui/switch'
-import { RefreshCw, ArrowUp, Check, ImagePlus } from 'lucide-react'
+import { RefreshCw, ArrowUp, Check, ImagePlus, X } from 'lucide-react'
 import { t } from '@/lib/i18n'
 import {
   clearDraftFromStorage,
@@ -96,11 +96,15 @@ export default function Popup() {
   const [sending, setSending] = useState(false)
   const [locatingUpload, setLocatingUpload] = useState(false)
   const [refreshSpinning, setRefreshSpinning] = useState(false)
+  const [imageData, setImageData] = useState(null) // { base64, mimeType, preview }
+  const [sendingImage, setSendingImage] = useState(false)
   const messageInputRef = useRef(null)
+  const imageInputRef = useRef(null)
   const activeRequestIdRef = useRef(null)
   const draftHydratedRef = useRef(false)
   const draftSaveTimerRef = useRef(null)
   const latestMessageRef = useRef('')
+  const latestProgressRef = useRef({ total: 0, completed: 0, ok: 0, fail: 0 })
 
   const selectedSet = new Set(selectedTabIds)
   const hasSelection = selectedTabIds.length > 0
@@ -309,6 +313,7 @@ export default function Popup() {
       const ok = Number(message.successCount) || 0
       const fail = Number(message.failCount) || 0
       const pending = Number(message.pendingCount) || Math.max(0, total - completed)
+      latestProgressRef.current = { total, completed, ok, fail }
       setProgressStatus(completed, total, ok, fail, pending)
       return false
     }
@@ -383,6 +388,71 @@ export default function Popup() {
     }
   }, [selectedTabIds, locatingUpload, sending, clearStatus, addStatus, handleContextLoss, aiTabs])
 
+  const handleImagePick = useCallback((e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 4 * 1024 * 1024) {
+      clearStatus()
+      addStatus(t('image_too_large'), 'error')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = reader.result
+      const base64 = dataUrl.split(',')[1]
+      setImageData({ base64, mimeType: file.type || 'image/png', preview: dataUrl })
+    }
+    reader.readAsDataURL(file)
+    // Reset so the same file can be re-selected
+    e.target.value = ''
+  }, [clearStatus, addStatus])
+
+  const handleRemoveImage = useCallback(() => {
+    setImageData(null)
+  }, [])
+
+  const handleSendImage = useCallback(async () => {
+    if (!imageData || selectedTabIds.length === 0 || sendingImage) return
+
+    clearStatus()
+    setSendingImage(true)
+    const tabIds = [...selectedTabIds]
+    const requestId = createRequestId()
+    addStatus(t('image_sending_to_n', [String(tabIds.length)]), 'pending')
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: 'BROADCAST_IMAGE',
+        imageBase64: imageData.base64,
+        mimeType: imageData.mimeType,
+        tabIds,
+        requestId,
+      })
+      clearStatus()
+
+      const results = Array.isArray(response?.results) ? response.results : []
+      let successCount = 0
+      results.forEach((result) => {
+        const tabInfo = aiTabs.find((tab) => tab.id === result.tabId)
+        const name = tabInfo ? tabInfo.platformName : t('tab_n', [String(result.tabId)])
+        if (result.success) {
+          successCount++
+          addStatus(t('image_sent', [name]), 'success')
+        } else {
+          addStatus(t('image_failed', [name, String(result.error || t('unknown'))]), 'error')
+        }
+      })
+
+      if (successCount > 0) setImageData(null)
+    } catch (error) {
+      if (handleContextLoss(error)) return
+      clearStatus()
+      addStatus(t('image_failed_simple', [String(error?.message || t('unknown'))]), 'error')
+    } finally {
+      setSendingImage(false)
+    }
+  }, [imageData, selectedTabIds, sendingImage, clearStatus, addStatus, handleContextLoss, aiTabs])
+
   const handleSend = useCallback(async () => {
     const text = messageText.trim()
     if (!text || selectedTabIds.length === 0) return
@@ -424,7 +494,11 @@ export default function Popup() {
         addStatus(t('safe_mode_auto_send_blocked'), 'pending')
       }
 
-      if (successCount === results.length && results.length > 0) {
+      const shouldClearDraft = results.length > 0 && (
+        successCount === results.length ||
+        (results.length >= 2 && successCount / results.length >= 0.5)
+      )
+      if (shouldClearDraft) {
         if (draftSaveTimerRef.current) {
           clearTimeout(draftSaveTimerRef.current)
           draftSaveTimerRef.current = null
@@ -491,6 +565,18 @@ export default function Popup() {
             message: t('broadcast_continues_background', [String(tabIds.length)]),
             type: 'pending',
           }])
+          // Clear draft if >= 2 tabs and error rate <= 50% based on progress so far
+          const p = latestProgressRef.current
+          if (p.total >= 2 && p.ok > 0 && (p.completed === 0 || p.ok / p.completed >= 0.5)) {
+            if (draftSaveTimerRef.current) {
+              clearTimeout(draftSaveTimerRef.current)
+              draftSaveTimerRef.current = null
+            }
+            latestMessageRef.current = ''
+            setMessageText('')
+            void clearDraftEverywhere()
+            if (messageInputRef.current) messageInputRef.current.value = ''
+          }
         }
         responsePromise.then(finishWithResponse).catch(finishWithError)
         return
@@ -642,6 +728,39 @@ export default function Popup() {
               onChange={(e) => setMessageText(e.target.value)}
               onKeyDown={handleKeyDown}
             />
+            {imageData && (
+              <div className="flex items-center gap-2 px-3 pb-2">
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg ring-1 ring-gray-200 dark:ring-zinc-600">
+                  <img src={imageData.preview} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black dark:bg-white/70 dark:text-black dark:hover:bg-white"
+                  >
+                    <X className="h-2.5 w-2.5" strokeWidth={3} />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  disabled={!hasSelection || sendingImage}
+                  onClick={handleSendImage}
+                  className={`inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[11px] font-semibold transition-colors ${
+                    hasSelection && !sendingImage
+                      ? 'bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-500'
+                  }`}
+                >
+                  {sendingImage ? t('sending_image') : t('paste_image')}
+                </button>
+              </div>
+            )}
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImagePick}
+            />
             <div className="flex items-center justify-between px-3 pb-3">
               <div className="flex items-center gap-1.5">
                 <label className="flex cursor-pointer items-center gap-2 rounded-full px-2.5 py-1.5 transition-colors">
@@ -668,21 +787,20 @@ export default function Popup() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  disabled={locateUploadDisabled}
-                  onClick={handleLocateUpload}
+                  disabled={!hasSelection || sending || sendingImage}
+                  onClick={() => imageInputRef.current?.click()}
                   title={
                     hasSelection
-                      ? t('locate_upload')
+                      ? t('paste_image')
                       : t('select_tabs_first')
                   }
-                  className={`inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-semibold transition-colors ${
-                    !locateUploadDisabled
+                  className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+                    hasSelection && !sending && !sendingImage
                       ? 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-600 dark:hover:bg-zinc-700'
                       : 'bg-gray-100 text-gray-400 ring-1 ring-gray-200 cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-500 dark:ring-zinc-600'
                   }`}
                 >
                   <ImagePlus className="h-3.5 w-3.5" />
-                  <span>{locatingUpload ? t('locating_upload') : t('locate_upload')}</span>
                 </button>
 
                 <button

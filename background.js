@@ -10,10 +10,12 @@ const AIB_SHARED = globalThis.__AIB_SHARED__ || null;
 const MESSAGE_TYPES = AIB_SHARED?.MESSAGE_TYPES || {
   GET_AI_TABS: 'GET_AI_TABS',
   BROADCAST_MESSAGE: 'BROADCAST_MESSAGE',
+  BROADCAST_IMAGE: 'BROADCAST_IMAGE',
   LOCATE_UPLOAD_ENTRIES: 'LOCATE_UPLOAD_ENTRIES',
   BROADCAST_PROGRESS: 'BROADCAST_PROGRESS',
   PING: 'PING',
   INJECT_MESSAGE: 'INJECT_MESSAGE',
+  INJECT_IMAGE: 'INJECT_IMAGE',
   SEND_NOW: 'SEND_NOW',
   HIGHLIGHT_UPLOAD_ENTRY: 'HIGHLIGHT_UPLOAD_ENTRY'
 };
@@ -306,6 +308,47 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         },
         error: err.message
       });
+    });
+    return true;
+  }
+  if (message.type === MESSAGE_TYPES.BROADCAST_IMAGE) {
+    (async () => {
+      const { imageBase64, mimeType, tabIds, requestId } = message;
+      const runtimeFlags = await getRuntimeFlags();
+      const resolvedRequestId = requestId || `req_${now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+      const debug = typeof message.debug === 'boolean' ? message.debug : runtimeFlags.debugLogs;
+      const logger = createLogger('background', resolvedRequestId, debug);
+      const ids = Array.isArray(tabIds) ? tabIds : [];
+      const results = [];
+
+      logger.info('broadcast-image-start', { tabCount: ids.length });
+
+      const tabPromises = ids.map(async (tabId) => {
+        try {
+          await ensureContentReady(tabId, resolvedRequestId, debug, logger);
+          const response = await chrome.tabs.sendMessage(tabId, {
+            type: MESSAGE_TYPES.INJECT_IMAGE,
+            imageBase64,
+            mimeType: mimeType || 'image/png',
+            requestId: resolvedRequestId,
+            debug
+          });
+          results.push({ tabId, ...response });
+        } catch (err) {
+          logger.error('image-tab-failure', { tabId, error: err?.message });
+          results.push({ tabId, success: false, error: err?.message || '图片注入失败', platform: 'Unknown' });
+        }
+      });
+
+      await Promise.race([
+        Promise.all(tabPromises),
+        new Promise((r) => setTimeout(r, 30000))
+      ]);
+
+      logger.info('broadcast-image-end', { resultCount: results.length });
+      sendResponse({ results });
+    })().catch((err) => {
+      sendResponse({ results: [], error: err.message });
     });
     return true;
   }
@@ -660,7 +703,8 @@ async function broadcastToTabs(payload) {
     guardMinDelayMs,
     guardJitterMs
   } = payload;
-  const effectiveAutoSend = Boolean(autoSend && !safeMode);
+  // Safe mode disabled — always respect user's autoSend setting
+  const effectiveAutoSend = Boolean(autoSend);
   const logger = createLogger('background', requestId, debug);
   const startedAt = now();
   const totalTabs = tabIds.length;
@@ -780,20 +824,11 @@ async function broadcastToTabs(payload) {
   }
 
   let timedOut = false;
-  for (let i = 0; i < tabIds.length; i += 1) {
-    if (now() - startedAt >= BROADCAST_HARD_TIMEOUT_MS) {
-      timedOut = true;
-      break;
-    }
-    if (i > 0) {
-      await sleep(jitter(guardMinDelayMs, guardJitterMs));
-    }
-    const tabId = tabIds[i];
-    try {
-      const res = await processTab(tabId);
-      recordResult(tabId, res);
-    } catch (err) {
-      recordResult(tabId, {
+  // Concurrent: fire all tabs in parallel, race against hard timeout
+  const tabPromises = tabIds.map((tabId) =>
+    processTab(tabId)
+      .then((res) => recordResult(tabId, res))
+      .catch((err) => recordResult(tabId, {
         tabId,
         success: false,
         error: err?.message || String(err),
@@ -801,9 +836,14 @@ async function broadcastToTabs(payload) {
         strategy: 'n/a',
         fallbackUsed: false,
         timings: { findInputMs: 0, injectMs: 0, sendMs: 0, totalMs: 0 }
-      });
-    }
-  }
+      }))
+  );
+  const timeoutSymbol = Symbol('hard-timeout');
+  const raceResult = await Promise.race([
+    Promise.all(tabPromises),
+    new Promise((r) => setTimeout(() => r(timeoutSymbol), BROADCAST_HARD_TIMEOUT_MS))
+  ]);
+  if (raceResult === timeoutSymbol) timedOut = true;
   finalized = true;
 
   if (timedOut) {
