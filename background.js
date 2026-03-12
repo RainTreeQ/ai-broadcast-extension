@@ -450,6 +450,31 @@ function getPlatformName(url) {
   return platform ? platform.name : null;
 }
 
+function getTabInjectionBlockReason(tab) {
+  const url = String(tab?.url || '');
+  if (!url) return '目标页面地址不可用';
+
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch (err) {
+    return '目标页面地址无效';
+  }
+
+  const protocol = parsed.protocol;
+  if (protocol === 'chrome:' || protocol === 'edge:' || protocol === 'about:') {
+    return '当前标签页是浏览器内部页面，无法注入，请切回 AI 对话页后重试';
+  }
+  if (protocol !== 'https:' && protocol !== 'http:') {
+    return '当前标签页协议不受支持，无法注入';
+  }
+  if (!getPlatformName(url)) {
+    return '当前标签页不是受支持的 AI 页面';
+  }
+
+  return null;
+}
+
 function normalizeTitle(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }
@@ -685,10 +710,15 @@ async function pingContent(tabId, requestId, debug) {
 
 async function ensureContentReady(tabId, requestId, debug, logger) {
   let tabActive = false;
+  let tabInfo = null;
   // Wait for page load to settle before probing/injecting content script.
   try {
-    const tab = await chrome.tabs.get(tabId);
-    tabActive = Boolean(tab?.active);
+    tabInfo = await chrome.tabs.get(tabId);
+    const blockedReason = getTabInjectionBlockReason(tabInfo);
+    if (blockedReason) throw new Error(blockedReason);
+
+    const tab = tabInfo;
+    tabActive = Boolean(tab.active);
     if (tab && tab.status !== 'complete') {
       logger.debug('content-wait-tab-load', { tabId, status: tab.status });
       try {
@@ -700,6 +730,7 @@ async function ensureContentReady(tabId, requestId, debug, logger) {
     }
   } catch (err) {
     logger.debug('content-get-tab-failed', { tabId, error: err?.message });
+    throw err;
   }
 
   if (await pingContent(tabId, requestId, debug)) {
@@ -1202,41 +1233,76 @@ async function locateUploadEntries(payload) {
 // ── Persistent popup window ──
 let boundsSaveTimer = null;
 
-chrome.action.onClicked.addListener(async () => {
-  const session = await chrome.storage.session.get('popupWindowId');
-  const popupWindowId = session.popupWindowId || null;
-
-  if (popupWindowId !== null) {
-    try {
-      const popupWindow = await chrome.windows.get(popupWindowId);
-      if (popupWindow?.id) {
-        await chrome.windows.update(popupWindowId, { focused: true });
-        return;
-      }
-    } catch (err) {
-      await chrome.storage.session.remove('popupWindowId');
-    }
+async function focusPopupWindow(windowId) {
+  try {
+    const popupWindow = await chrome.windows.get(windowId);
+    if (!popupWindow?.id) return false;
+    const updateOptions = { focused: true };
+    if (popupWindow.state === 'minimized') updateOptions.state = 'normal';
+    await chrome.windows.update(windowId, updateOptions);
+    return true;
+  } catch (err) {
+    return false;
   }
+}
 
-  // 读取上次保存的窗口状态
-  const savedState = await chrome.storage.local.get('popupWindowState');
-  const bounds = savedState.popupWindowState || {};
-  
-  const createOptions = {
-    url: chrome.runtime.getURL('app/dist-extension/popup.html'),
-    type: 'popup',
-    width: bounds.width || 420,
-    height: bounds.height || 620,
-    setSelfAsOpener: true, // 试图彻底剥离地址栏（一些 Chrome 版本上有效）
-    focused: true
-  };
+chrome.action.onClicked.addListener(async () => {
+  console.log('[AIB] action.onClicked fired');
+  try {
+    const session = await chrome.storage.session.get('popupWindowId');
+    let popupWindowId = session.popupWindowId || null;
 
-  if (Number.isInteger(bounds.left)) createOptions.left = bounds.left;
-  if (Number.isInteger(bounds.top)) createOptions.top = bounds.top;
+    // 1. 先尝试用 session 里存的 ID 唤起
+    if (popupWindowId !== null) {
+      const focused = await focusPopupWindow(popupWindowId);
+      if (focused) return;
+      try {
+        await chrome.storage.session.remove('popupWindowId');
+        popupWindowId = null;
+      } catch (err) {
+        popupWindowId = null;
+      }
+    }
 
-  const popupWindow = await chrome.windows.create(createOptions);
-  if (popupWindow?.id) {
-    await chrome.storage.session.set({ popupWindowId: popupWindow.id });
+    // 2. 兜底策略：如果 session 里没有或者失效了，遍历当前所有打开的窗口，查找我们的弹窗
+    if (popupWindowId === null) {
+      const allWindows = await chrome.windows.getAll({ populate: true, windowTypes: ['popup'] });
+      const popupUrlMatch = chrome.runtime.getURL('app/dist-extension/popup.html');
+      
+      const existingPopup = allWindows.find(win => {
+        // 查找窗口内有没有任何一个 tab 的 URL 匹配我们的 popup
+        return win.tabs?.some(tab => tab.url && tab.url.startsWith(popupUrlMatch));
+      });
+
+      if (existingPopup) {
+        console.log('[AIB] Found existing popup by URL fallback, focusing it.');
+        await focusPopupWindow(existingPopup.id);
+        await chrome.storage.session.set({ popupWindowId: existingPopup.id });
+        return; // 找到了就把它拉到最上层，然后终止
+      }
+    }
+
+    // 3. 确实没有打开过，执行创建逻辑
+    const savedState = await chrome.storage.local.get('popupWindowState');
+    const bounds = savedState.popupWindowState || {};
+
+    const createOptions = {
+      url: chrome.runtime.getURL('app/dist-extension/popup.html'),
+      type: 'popup',
+      width: bounds.width || 420,
+      height: bounds.height || 620,
+      focused: true
+    };
+
+    if (Number.isInteger(bounds.left)) createOptions.left = bounds.left;
+    if (Number.isInteger(bounds.top)) createOptions.top = bounds.top;
+
+    const popupWindow = await chrome.windows.create(createOptions);
+    if (popupWindow?.id) {
+      await chrome.storage.session.set({ popupWindowId: popupWindow.id });
+    }
+  } catch (err) {
+    console.error('[AIB] action.onClicked error:', err);
   }
 });
 

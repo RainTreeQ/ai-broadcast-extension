@@ -49,8 +49,6 @@ export const defaultSelectors = {
   },
   grok: {
     findInput: [
-      'textarea[aria-label*="ask" i]',
-      'textarea[aria-label*="grok" i]',
       'textarea[placeholder]',
       'textarea',
       'div[contenteditable="true"][role="textbox"]',
@@ -134,26 +132,108 @@ export const defaultSelectors = {
       'button[aria-label*="发送"]',
       'button[aria-label*="Send"]'
     ]
+  },
+  mistral: {
+    findInput: [
+      'textarea[placeholder]',
+      'textarea',
+      'div[contenteditable="true"][role="textbox"]',
+      'div[contenteditable="true"]'
+    ],
+    findSendBtn: [
+      'button[type="submit"]',
+      'button[aria-label*="Send"]',
+      'button[aria-label*="Submit"]',
+      'button[data-testid*="send"]'
+    ]
   }
 };
 
 let cachedSelectors = null;
 
+function normalizeSelectorConfig(config) {
+  return {
+    findInput: Array.isArray(config?.findInput) ? config.findInput : [],
+    findSendBtn: Array.isArray(config?.findSendBtn) ? config.findSendBtn : [],
+    mode: config?.mode || 'override'
+  };
+}
+
+function mergeSelectors(localConfig, remoteConfig, mode) {
+  const local = normalizeSelectorConfig(localConfig);
+  const remote = normalizeSelectorConfig(remoteConfig);
+  if (mode === 'disabled') {
+    return { findInput: [], findSendBtn: [], mode: 'disabled' };
+  }
+  if (mode === 'merge') {
+    return {
+      findInput: [...remote.findInput, ...local.findInput],
+      findSendBtn: [...remote.findSendBtn, ...local.findSendBtn],
+      mode: 'merge'
+    };
+  }
+  return {
+    findInput: remote.findInput,
+    findSendBtn: remote.findSendBtn,
+    mode: 'override'
+  };
+}
+
 export async function getDynamicSelectors() {
   if (cachedSelectors) return cachedSelectors;
   try {
-    const data = await chrome.storage.local.get('aib_dynamic_selectors');
-    cachedSelectors = data.aib_dynamic_selectors || defaultSelectors;
+    const store = await chrome.storage.local.get('aib_dynamic_selectors');
+    const payload = store?.aib_dynamic_selectors?.data;
+    if (!payload || typeof payload !== 'object') {
+      cachedSelectors = defaultSelectors;
+      return cachedSelectors;
+    }
+
+    const isV2 = Number(payload.version || 0) >= 2;
+    const merged = {};
+    const platformIds = new Set([
+      ...Object.keys(defaultSelectors),
+      ...Object.keys(payload).filter((key) => key !== 'version')
+    ]);
+
+    for (const platformId of platformIds) {
+      const localConfig = defaultSelectors[platformId];
+      const remoteConfig = payload[platformId];
+      if (!remoteConfig) {
+        merged[platformId] = normalizeSelectorConfig(localConfig);
+        continue;
+      }
+      const mode = isV2 ? String(remoteConfig.mode || 'override') : 'merge';
+      merged[platformId] = mergeSelectors(localConfig, remoteConfig, mode);
+    }
+
+    cachedSelectors = merged;
   } catch (err) {
     cachedSelectors = defaultSelectors;
   }
   return cachedSelectors;
 }
 
-export function findBySelectors(selectors) {
-  for (const selector of selectors) {
-    const found = document.querySelector(selector);
-    if (found) return found;
+export async function findInputForPlatform(platformId) {
+  const selectors = await getDynamicSelectors();
+  const list = selectors?.[platformId]?.findInput || [];
+  for (const selector of list) {
+    try {
+      const found = document.querySelector(selector);
+      if (found) return found;
+    } catch (_) {}
+  }
+  return null;
+}
+
+export async function findSendBtnForPlatform(platformId) {
+  const selectors = await getDynamicSelectors();
+  const list = selectors?.[platformId]?.findSendBtn || [];
+  for (const selector of list) {
+    try {
+      const found = document.querySelector(selector);
+      if (found && !found.disabled && found.getAttribute('aria-disabled') !== 'true') return found;
+    } catch (_) {}
   }
   return null;
 }

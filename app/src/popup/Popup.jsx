@@ -1,6 +1,7 @@
 /* global chrome */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Switch } from '@/components/ui/switch'
+import { Button } from '@/components/ui/button'
 import { RefreshCw, ArrowUp, Check, ImagePlus, X } from 'lucide-react'
 import { t } from '@/lib/i18n'
 import {
@@ -51,6 +52,7 @@ const PLATFORM_STYLES = {
 
 const SEND_LOADING_SOFT_TIMEOUT_MS = 25000
 const DRAFT_SAVE_DEBOUNCE_MS = 400
+const IMAGE_SUPPORTED_PLATFORMS = new Set(['ChatGPT', 'Claude'])
 const CONTEXT_ERROR_PATTERNS = [
   'Extension context invalidated',
   'Could not establish connection. Receiving end does not exist.',
@@ -97,6 +99,7 @@ export default function Popup() {
   const [locatingUpload, setLocatingUpload] = useState(false)
   const [refreshSpinning, setRefreshSpinning] = useState(false)
   const [imageData, setImageData] = useState(null) // { base64, mimeType, preview }
+  const [showImageConfirm, setShowImageConfirm] = useState(false)
   const messageInputRef = useRef(null)
   const imageInputRef = useRef(null)
   const activeRequestIdRef = useRef(null)
@@ -109,6 +112,12 @@ export default function Popup() {
   const hasSelection = selectedTabIds.length > 0
   const hasText = messageText.trim().length > 0
   const hasImage = Boolean(imageData)
+  const imageCapableTabIds = selectedTabIds.filter((id) => {
+    const tab = aiTabs.find((item) => item.id === id)
+    return tab && IMAGE_SUPPORTED_PLATFORMS.has(tab.platformName)
+  })
+  const anySelectedSupportImage = imageCapableTabIds.length > 0
+  const imageEnabled = anySelectedSupportImage && !sending
   const sendDisabled = !(hasSelection && (hasText || hasImage)) || sending
   const locateUploadDisabled = !hasSelection || tabsLoading || sending || locatingUpload
   const selectAllLabel =
@@ -411,13 +420,32 @@ export default function Popup() {
     setImageData(null)
   }, [])
 
-  const handleSend = useCallback(async () => {
+  const performSend = useCallback(async ({ bypassImageConfirm = false } = {}) => {
     const text = messageText.trim()
     const hasImage = Boolean(imageData)
     
     // Must have either text or image
     if (!text && !hasImage) return
     if (selectedTabIds.length === 0) return
+
+    const supportedImageTabIds = selectedTabIds.filter((id) => {
+      const tab = aiTabs.find((item) => item.id === id)
+      return tab && IMAGE_SUPPORTED_PLATFORMS.has(tab.platformName)
+    })
+    const unsupportedImageTabIds = selectedTabIds.filter((id) => !supportedImageTabIds.includes(id))
+
+    if (hasImage && unsupportedImageTabIds.length > 0 && !bypassImageConfirm) {
+      setShowImageConfirm(true)
+      return
+    }
+
+    if (hasImage && supportedImageTabIds.length === 0 && !text) {
+      clearStatus()
+      addStatus(t('image_unsupported_platforms'), 'error')
+      return
+    }
+
+    setShowImageConfirm(false)
 
     clearStatus()
     setSending(true)
@@ -509,20 +537,9 @@ export default function Popup() {
     setProgressStatus(0, tabIds.length, 0, 0, tabIds.length)
 
     try {
-      // If image is attached, use BROADCAST_IMAGE (which now supports text + autoSend)
-      // Otherwise use the original BROADCAST_MESSAGE flow
-      const messagePayload = hasImage
-        ? {
-            type: 'BROADCAST_IMAGE',
-            imageBase64: imageData.base64,
-            mimeType: imageData.mimeType,
-            text,
-            autoSend,
-            tabIds,
-            requestId,
-            debug,
-          }
-        : {
+      const responsePromise = (async () => {
+        if (!hasImage) {
+          return chrome.runtime.sendMessage({
             type: 'BROADCAST_MESSAGE',
             text,
             autoSend,
@@ -531,9 +548,42 @@ export default function Popup() {
             requestId,
             clientTs,
             debug,
-          }
-      
-      const responsePromise = chrome.runtime.sendMessage(messagePayload)
+          })
+        }
+
+        const responses = []
+
+        if (supportedImageTabIds.length > 0) {
+          const imageResponse = await chrome.runtime.sendMessage({
+            type: 'BROADCAST_IMAGE',
+            imageBase64: imageData.base64,
+            mimeType: imageData.mimeType,
+            text,
+            autoSend,
+            tabIds: supportedImageTabIds,
+            requestId,
+            debug,
+          })
+          responses.push(imageResponse)
+        }
+
+        if (unsupportedImageTabIds.length > 0 && text) {
+          const textResponse = await chrome.runtime.sendMessage({
+            type: 'BROADCAST_MESSAGE',
+            text,
+            autoSend,
+            newChat,
+            tabIds: unsupportedImageTabIds,
+            requestId,
+            clientTs,
+            debug,
+          })
+          responses.push(textResponse)
+        }
+
+        const mergedResults = responses.flatMap((item) => (Array.isArray(item?.results) ? item.results : []))
+        return { results: mergedResults }
+      })()
       const softTimeoutToken = Symbol('soft-timeout')
       const raced = await Promise.race([
         responsePromise,
@@ -567,14 +617,30 @@ export default function Popup() {
     }
   }, [messageText, imageData, selectedTabIds, autoSend, newChat, aiTabs, addStatus, clearStatus, loadTabs, setProgressStatus, handleContextLoss, clearDraftEverywhere])
 
+  const handleSend = useCallback(() => {
+    void performSend()
+  }, [performSend])
+
+  const handleConfirmSend = useCallback(() => {
+    void performSend({ bypassImageConfirm: true })
+  }, [performSend])
+
+  const handleCancelSend = useCallback(() => {
+    setShowImageConfirm(false)
+  }, [])
+
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
+        if (showImageConfirm) {
+          handleConfirmSend()
+          return
+        }
         if (!sendDisabled) handleSend()
       }
     },
-    [sendDisabled, handleSend]
+    [sendDisabled, handleSend, showImageConfirm, handleConfirmSend]
   )
 
   return (
@@ -755,15 +821,11 @@ export default function Popup() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  disabled={!hasSelection || sending}
+                  disabled={!imageEnabled}
                   onClick={() => imageInputRef.current?.click()}
-                  title={
-                    hasSelection
-                      ? t('image_attach')
-                      : t('select_tabs_first')
-                  }
+                  title={t('image_unsupported_platforms')}
                   className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
-                    hasSelection && !sending
+                    imageEnabled
                       ? 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-100 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-600 dark:hover:bg-zinc-700'
                       : 'bg-gray-100 text-gray-400 ring-1 ring-gray-200 cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-500 dark:ring-zinc-600'
                   }`}
@@ -796,6 +858,23 @@ export default function Popup() {
             </div>
           </div>
         </div>
+
+        {showImageConfirm && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/35 px-4">
+            <div className="w-full max-w-[300px] rounded-2xl border border-gray-200 bg-zinc-50 p-4 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.35)] dark:border-zinc-600 dark:bg-zinc-800 dark:shadow-[0_14px_34px_-14px_rgba(0,0,0,0.7)]">
+              <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">{t('image_confirm_title')}</p>
+              <p className="mt-2 text-[12px] leading-relaxed text-gray-600 dark:text-zinc-300">{t('image_confirm_body')}</p>
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <Button variant="ghost" size="sm" onClick={handleCancelSend}>
+                  {t('image_confirm_cancel')}
+                </Button>
+                <Button variant="default" size="sm" onClick={handleConfirmSend}>
+                  {t('image_confirm_send')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
