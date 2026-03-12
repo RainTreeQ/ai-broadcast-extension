@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-12 16:04 | v2.10.0 (MINOR) | Background | `background.js` <!-- auto:c98aa7de5324 -->
 - 2026-03-12 15:51 | v2.9.0 (MINOR) | Content Script / Manifest/Permissions / Core | `content.js`, `manifest.json`, `src/content/adapters/chatgpt.js`, `src/content/adapters/claude.js`, `src/content/adapters/deepseek.js`, `src/content/adapters/doubao.js`, +13 <!-- auto:f8ad4ef06b83 -->
 - 2026-03-12 14:48 | v2.8.0 (MINOR) | Popup UI / Background / Content Script / Core | `app/src/popup/Popup.jsx`, `background.js`, `content.js`, `selectors.json`, `src/content/index.js`, `src/content/selectors.js` <!-- auto:c967bde3ee04 -->
 - 2026-03-12 10:45 | v2.7.0 (MINOR) | UI Components / Core / Popup UI / Background / Content Script / Manifest/Permissions / Tooling | `app/src/index.css`, `app/src/lib/i18n.js`, `app/src/popup/Popup.jsx`, `background.js`, `content.js`, `manifest.json`, +6 <!-- auto:6d5d70f6bae5 -->
@@ -37,7 +38,6 @@
 - 2026-03-05 16:03 | v2.3.0 (MINOR) | Core / UI Components / Popup UI / Background / Content Script / Manifest/Permissions / Tooling | `.githooks/pre-commit`, `.gitignore`, `app/.gitignore`, `app/design-system.html`, `app/package.json`, `app/src/App.jsx`, +23 <!-- auto:19378aadd9b5 -->
 - 2026-03-04 17:56 | v2.2.0 (MINOR) | Core / UI Components / Content Script / Tooling | `.githooks/pre-commit`, `app/src/App.jsx`, `app/src/components/layout/Footer.jsx`, `app/src/components/layout/Header.jsx`, `app/src/components/layout/Hero.jsx`, `app/src/index.css`, +8 <!-- auto:2becda24e69a -->
 - 2026-03-04 10:39 | v2.1.0 (MINOR) | Core / UI Components | `app/package.json`, `app/src/App.jsx`, `app/src/components/layout/Footer.jsx`, `app/src/components/layout/Header.jsx`, `app/src/components/layout/Hero.jsx`, `app/src/components/ui/badge.jsx`, +7 <!-- auto:9ea54d0811b3 -->
-- 2026-03-04 10:11 | v1.9.0 (MINOR) | Core / Popup UI / Manifest/Permissions / Tooling | `.githooks/pre-commit`, `app/src/popup/Popup.jsx`, `manifest.json`, `package.json`, `scripts/precommit-automation.mjs` <!-- auto:3de90e0794dd -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---

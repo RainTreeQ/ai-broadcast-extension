@@ -1231,85 +1231,94 @@ async function locateUploadEntries(payload) {
 }
 
 // ── Persistent popup window ──
+const POPUP_PAGE_PATH = 'app/dist-extension/popup.html';
+const POPUP_BOUNDS_KEY = 'popupWindowState';
+const POPUP_WINDOW_ID_KEY = 'popupWindowId';
 let boundsSaveTimer = null;
 
-async function focusPopupWindow(windowId) {
+function getPopupPageUrl() {
+  return chrome.runtime.getURL(POPUP_PAGE_PATH);
+}
+
+async function focusPopupWindow(windowId, tabId = null) {
   try {
     const popupWindow = await chrome.windows.get(windowId);
     if (!popupWindow?.id) return false;
     const updateOptions = { focused: true };
     if (popupWindow.state === 'minimized') updateOptions.state = 'normal';
+    if (Number.isInteger(tabId)) {
+      try {
+        await chrome.tabs.update(tabId, { active: true });
+      } catch {
+        // ignore tab activation errors
+      }
+    }
     await chrome.windows.update(windowId, updateOptions);
+    const verified = await chrome.windows.get(windowId);
+    if (verified?.focused) return true;
+    await chrome.windows.update(windowId, { drawAttention: true });
     return true;
-  } catch (err) {
+  } catch {
     return false;
   }
 }
 
+async function findPopupWindowByUrl() {
+  const popupUrl = getPopupPageUrl();
+  const allWindows = await chrome.windows.getAll({ populate: true });
+  for (const win of allWindows) {
+    const matchedTab = win.tabs?.find((tab) => typeof tab?.url === 'string' && tab.url.startsWith(popupUrl));
+    if (matchedTab) {
+      return { windowId: win.id, tabId: matchedTab.id };
+    }
+  }
+  return null;
+}
+
 chrome.action.onClicked.addListener(async () => {
-  console.log('[AIB] action.onClicked fired');
   try {
-    const session = await chrome.storage.session.get('popupWindowId');
-    let popupWindowId = session.popupWindowId || null;
+    const stored = await chrome.storage.local.get(POPUP_WINDOW_ID_KEY);
+    let popupWindowId = Number.isInteger(stored?.[POPUP_WINDOW_ID_KEY]) ? stored[POPUP_WINDOW_ID_KEY] : null;
 
-    // 1. 先尝试用 session 里存的 ID 唤起
     if (popupWindowId !== null) {
-      const focused = await focusPopupWindow(popupWindowId);
-      if (focused) return;
-      try {
-        await chrome.storage.session.remove('popupWindowId');
-        popupWindowId = null;
-      } catch (err) {
-        popupWindowId = null;
+      const handled = await focusPopupWindow(popupWindowId);
+      if (handled) return;
+      popupWindowId = null;
+      await chrome.storage.local.remove(POPUP_WINDOW_ID_KEY);
+    }
+
+    const discoveredPopup = await findPopupWindowByUrl();
+    if (Number.isInteger(discoveredPopup?.windowId)) {
+      const handled = await focusPopupWindow(discoveredPopup.windowId, discoveredPopup.tabId);
+      if (handled) {
+        await chrome.storage.local.set({ [POPUP_WINDOW_ID_KEY]: discoveredPopup.windowId });
+        return;
       }
     }
 
-    // 2. 兜底策略：如果 session 里没有或者失效了，遍历当前所有打开的窗口，查找我们的弹窗
-    if (popupWindowId === null) {
-      const allWindows = await chrome.windows.getAll({ populate: true, windowTypes: ['popup'] });
-      const popupUrlMatch = chrome.runtime.getURL('app/dist-extension/popup.html');
-      
-      const existingPopup = allWindows.find(win => {
-        // 查找窗口内有没有任何一个 tab 的 URL 匹配我们的 popup
-        return win.tabs?.some(tab => tab.url && tab.url.startsWith(popupUrlMatch));
-      });
-
-      if (existingPopup) {
-        console.log('[AIB] Found existing popup by URL fallback, focusing it.');
-        await focusPopupWindow(existingPopup.id);
-        await chrome.storage.session.set({ popupWindowId: existingPopup.id });
-        return; // 找到了就把它拉到最上层，然后终止
-      }
-    }
-
-    // 3. 确实没有打开过，执行创建逻辑
-    const savedState = await chrome.storage.local.get('popupWindowState');
-    const bounds = savedState.popupWindowState || {};
-
+    const savedState = await chrome.storage.local.get(POPUP_BOUNDS_KEY);
+    const bounds = savedState?.[POPUP_BOUNDS_KEY] || {};
     const createOptions = {
-      url: chrome.runtime.getURL('app/dist-extension/popup.html'),
+      url: getPopupPageUrl(),
       type: 'popup',
-      width: bounds.width || 420,
-      height: bounds.height || 620,
+      width: Number.isInteger(bounds.width) ? bounds.width : 420,
+      height: Number.isInteger(bounds.height) ? bounds.height : 620,
       focused: true
     };
-
     if (Number.isInteger(bounds.left)) createOptions.left = bounds.left;
     if (Number.isInteger(bounds.top)) createOptions.top = bounds.top;
 
     const popupWindow = await chrome.windows.create(createOptions);
-    if (popupWindow?.id) {
-      await chrome.storage.session.set({ popupWindowId: popupWindow.id });
+    if (Number.isInteger(popupWindow?.id)) {
+      await chrome.storage.local.set({ [POPUP_WINDOW_ID_KEY]: popupWindow.id });
     }
   } catch (err) {
     console.error('[AIB] action.onClicked error:', err);
   }
 });
 
-// 监听窗口尺寸或位置变化，保存最新状态
 if (chrome.windows.onBoundsChanged) {
   chrome.windows.onBoundsChanged.addListener((window) => {
-    // 立即捕获我们需要的属性值，因为对象可能会在异步回调后被垃圾回收或者变更
     const newBounds = {
       width: window.width,
       height: window.height,
@@ -1318,28 +1327,25 @@ if (chrome.windows.onBoundsChanged) {
       id: window.id
     };
 
-    // 同步清除旧定时器
-    if (boundsSaveTimer) {
-      clearTimeout(boundsSaveTimer);
-    }
-
+    if (boundsSaveTimer) clearTimeout(boundsSaveTimer);
     boundsSaveTimer = setTimeout(async () => {
       boundsSaveTimer = null;
       try {
-        const session = await chrome.storage.session.get('popupWindowId');
-        if (newBounds.id === session.popupWindowId) {
-          await chrome.storage.local.set({ popupWindowState: newBounds });
+        const stored = await chrome.storage.local.get(POPUP_WINDOW_ID_KEY);
+        const popupWindowId = stored?.[POPUP_WINDOW_ID_KEY];
+        if (newBounds.id === popupWindowId) {
+          await chrome.storage.local.set({ [POPUP_BOUNDS_KEY]: newBounds });
         }
       } catch (err) {
         console.warn('[AIB] Failed to save window bounds:', err);
       }
-    }, 500); // 防抖 500ms
+    }, 500);
   });
 }
 
 chrome.windows.onRemoved.addListener(async (windowId) => {
-  const session = await chrome.storage.session.get('popupWindowId');
-  if (windowId === session.popupWindowId) {
-    await chrome.storage.session.remove('popupWindowId');
+  const stored = await chrome.storage.local.get(POPUP_WINDOW_ID_KEY);
+  if (windowId === stored?.[POPUP_WINDOW_ID_KEY]) {
+    await chrome.storage.local.remove(POPUP_WINDOW_ID_KEY);
   }
 });
