@@ -29,7 +29,7 @@ const PLATFORMS = [
   { id: 'claude',   name: 'Claude',   url: 'https://claude.ai/' },
   { id: 'gemini',   name: 'Gemini',   url: 'https://gemini.google.com/' },
   { id: 'grok',     name: 'Grok',     url: 'https://grok.com/' },
-  { id: 'deepseek', name: 'DeepSeek', url: 'https://www.deepseek.com/' },
+  { id: 'deepseek', name: 'DeepSeek', url: 'https://chat.deepseek.com/' },
   { id: 'doubao',   name: 'Doubao',   url: 'https://www.doubao.com/' },
   { id: 'qianwen',  name: 'Qianwen',  url: 'https://www.qianwen.com/' },
   { id: 'yuanbao',  name: 'Yuanbao',  url: 'https://yuanbao.tencent.com/' },

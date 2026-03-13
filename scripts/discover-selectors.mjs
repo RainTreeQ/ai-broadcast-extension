@@ -21,7 +21,7 @@ const PLATFORMS = {
   claude: { url: 'https://claude.ai/', name: 'Claude' },
   gemini: { url: 'https://gemini.google.com/', name: 'Gemini' },
   grok: { url: 'https://grok.com/', name: 'Grok' },
-  deepseek: { url: 'https://www.deepseek.com/', name: 'DeepSeek' },
+  deepseek: { url: 'https://chat.deepseek.com/', name: 'DeepSeek' },
   doubao: { url: 'https://www.doubao.com/', name: 'Doubao' },
   qianwen: { url: 'https://www.qianwen.com/', name: 'Qianwen' },
   yuanbao: { url: 'https://yuanbao.tencent.com/', name: 'Yuanbao' },
