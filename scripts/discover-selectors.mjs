@@ -32,6 +32,11 @@ const PLATFORMS = {
 async function isAuthGate(page) {
   return page.evaluate(() => {
     const hasPassword = document.querySelector('input[type="password"]') !== null;
+    const hasEmail = document.querySelector('input[type="email"]') !== null;
+    const hasPhone = document.querySelector('input[type="tel"]') !== null;
+    const isLoginUrl = window.location.pathname.includes('sign_in')
+      || window.location.pathname.includes('login')
+      || window.location.pathname.includes('auth');
     const text = (document.body?.innerText || '').toLowerCase();
     const keywords = [
       'sign in',
@@ -43,7 +48,7 @@ async function isAuthGate(page) {
       '注册',
       '继续',
     ];
-    return hasPassword || keywords.some((k) => text.includes(k));
+    return hasPassword || hasEmail || hasPhone || isLoginUrl || keywords.some((k) => text.includes(k));
   });
 }
 

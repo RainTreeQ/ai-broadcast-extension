@@ -83,15 +83,12 @@ async function detectAuthRequired(page) {
     const text = (document.body?.innerText || '').toLowerCase();
     const hasKeyword = keywords.some((k) => text.includes(k));
     const hasPasswordInput = document.querySelector('input[type="password"]') !== null;
-    const oauthButtons = Array.from(document.querySelectorAll('button, a')).some((node) => {
-      const label = (
-        node.getAttribute('aria-label') ||
-        node.textContent ||
-        ''
-      ).toLowerCase();
-      return label.includes('google') || label.includes('apple') || label.includes('github');
-    });
-    return hasPasswordInput || (hasKeyword && oauthButtons);
+    const hasEmailInput = document.querySelector('input[type="email"]') !== null;
+    const hasPhoneInput = document.querySelector('input[type="tel"]') !== null;
+    const isLoginUrl = window.location.pathname.includes('sign_in')
+      || window.location.pathname.includes('login')
+      || window.location.pathname.includes('auth');
+    return hasPasswordInput || hasEmailInput || hasPhoneInput || isLoginUrl || (hasKeyword && hasKeyword);
   }, AUTH_KEYWORDS);
 }
 
