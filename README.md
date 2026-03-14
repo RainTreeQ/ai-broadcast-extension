@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-14 09:00 | v2.11.4 (PATCH) | Core | `.github/workflows/e2e-monitor.yml`, `.github/workflows/retry-failed.yml` <!-- auto:19843862dfd1 -->
 - 2026-03-13 16:04 | v2.11.3 (PATCH) | Tooling | `scripts/discover-selectors.mjs`, `scripts/test-input-support.mjs` <!-- auto:2b626a9fd634 -->
 - 2026-03-13 15:55 | v2.11.2 (PATCH) | Tooling | `scripts/discover-selectors.mjs`, `scripts/test-input-support.mjs` <!-- auto:46ff3d6d992f -->
 - 2026-03-13 15:43 | v2.11.1 (PATCH) | Tooling | `scripts/export-auth-state.mjs` <!-- auto:ddf4b54df87c -->
@@ -37,7 +38,6 @@
 - 2026-03-11 16:47 | v2.6.2 (PATCH) | Core | `check-workflows.sh` <!-- auto:5b3fe11124bb -->
 - 2026-03-11 16:38 | v2.6.1 (PATCH) | Core | `.github/workflows/e2e-monitor.yml` <!-- auto:8530c364ee64 -->
 - 2026-03-11 16:35 | v2.6.0 (MINOR) | Core / UI Components / Popup UI / Background / Tooling | `.github/workflows/auto-fix-selectors.yml`, `.github/workflows/e2e-monitor.yml`, `.github/workflows/retry-failed.yml`, `.gitignore`, `app/src/components/layout/Header.jsx`, `app/src/lib/i18n.js`, +14 <!-- auto:20be7347071b -->
-- 2026-03-05 18:57 | v2.5.0 (MINOR) | Core / Popup UI / Background / Content Script | `app/src/lib/i18n.js`, `app/src/popup/Popup.jsx`, `background.js`, `content.js` <!-- auto:e01347c4e8d9 -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---
