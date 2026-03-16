@@ -41,10 +41,10 @@ export function createInjectionTools(deps) {
       ? window.HTMLTextAreaElement.prototype
       : window.HTMLInputElement.prototype;
     const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
-    const tracker = el._valueTracker;
-    if (tracker) tracker.setValue(el.value || '');
     if (setter) setter.call(el, value);
     else el.value = value;
+    const tracker = el._valueTracker;
+    if (tracker) tracker.setValue('');
     el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: value }));
     el.dispatchEvent(new Event('change', { bubbles: true }));
     return { strategy: 'react-value', fallbackUsed: false };
@@ -330,9 +330,9 @@ export function createInjectionTools(deps) {
             try { editor.deleteFragment(); } catch (_) {}
             editor.insertText(text);
             el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: text }));
-            if (await verifyContent(el, text)) {
-              return { strategy: 'qianwen-slate-api', fallbackUsed: false };
-            }
+            const ok = await verifyContent(el, text);
+            if (ok) return { strategy: 'qianwen-slate-api', fallbackUsed: false };
+            break;
           }
           fiber = fiber.return;
         }

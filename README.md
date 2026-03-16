@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-16 18:39 | v2.20.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/core/injection.js` <!-- auto:4b6e9f6695ed -->
 - 2026-03-16 18:30 | v2.19.0 (MINOR) | Content Script / Core | `content.js`, `src/content/core/injection.js` <!-- auto:4a015183fa49 -->
 - 2026-03-16 18:13 | v2.18.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/adapters/grok.js`, `src/content/core/injection.js`, `src/content/index.js`, `src/content/selectors.js` <!-- auto:a7e60ddd1feb -->
 - 2026-03-16 17:06 | v2.17.0 (MINOR) | Core / Popup UI | `app/popup.html`, `app/src/popup/Popup.jsx` <!-- auto:d26bfd268d46 -->
@@ -37,7 +38,6 @@
 - 2026-03-16 15:03 | v2.11.9 (PATCH) | Core | `selectors.json`, `src/content/selectors.js` <!-- auto:35e816541370 -->
 - 2026-03-16 14:45 | v2.11.8 (PATCH) | Core | `.github/workflows/auto-fix-selectors.yml`, `.github/workflows/retry-failed.yml` <!-- auto:bc71c47c2c36 -->
 - 2026-03-16 14:41 | v2.11.7 (PATCH) | Core | `.github/workflows/auto-fix-selectors.yml` <!-- auto:f1a32c508036 -->
-- 2026-03-16 14:33 | v2.11.6 (PATCH) | Core | `.github/workflows/auto-fix-selectors.yml` <!-- auto:72bbcf71cc7f -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---

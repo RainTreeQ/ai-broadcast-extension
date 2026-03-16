@@ -412,7 +412,25 @@
         return await findInputForPlatform2("chatgpt") || waitFor(() => findInputHeuristically2());
       },
       async inject(el, text, options) {
-        if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") return setReactValue(el, text);
+        if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") {
+          el.focus();
+          await sleep(30);
+          el.select();
+          el.dispatchEvent(new InputEvent("beforeinput", {
+            inputType: "insertText",
+            data: text,
+            bubbles: true,
+            cancelable: true,
+            composed: true
+          }));
+          setReactValue(el, text);
+          await sleep(60);
+          const actual = normalizeText(getContent(el));
+          const expected = normalizeText(text);
+          if (actual && (actual.includes(expected.slice(0, Math.min(expected.length, 24))) || expected.includes(actual.slice(0, 24)))) {
+            return { strategy: "chatgpt-react-value", fallbackUsed: false };
+          }
+        }
         const isLexical = el.hasAttribute("data-lexical-editor") || el.closest("[data-lexical-editor]");
         if (isLexical) {
           el.focus();
@@ -1258,10 +1276,10 @@
     function setReactValue(el, value) {
       const proto = el.tagName === "TEXTAREA" ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
       const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
-      const tracker = el._valueTracker;
-      if (tracker) tracker.setValue(el.value || "");
       if (setter) setter.call(el, value);
       else el.value = value;
+      const tracker = el._valueTracker;
+      if (tracker) tracker.setValue("");
       el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: value }));
       el.dispatchEvent(new Event("change", { bubbles: true }));
       return { strategy: "react-value", fallbackUsed: false };
@@ -1528,9 +1546,9 @@
               }
               editor.insertText(text);
               el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
-              if (await verifyContent(el, text)) {
-                return { strategy: "qianwen-slate-api", fallbackUsed: false };
-              }
+              const ok = await verifyContent(el, text);
+              if (ok) return { strategy: "qianwen-slate-api", fallbackUsed: false };
+              break;
             }
             fiber = fiber.return;
           }
