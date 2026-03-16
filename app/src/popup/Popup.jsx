@@ -645,7 +645,7 @@ export default function Popup() {
   )
 
   return (
-    <div className="relative flex min-h-[500px] min-w-[360px] w-screen h-screen flex-col overflow-hidden bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-gray-100 font-sans">
+    <div className="relative flex w-full h-full flex-col overflow-hidden bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-gray-100 font-sans">
       <div className="absolute inset-x-0 top-0 z-30">
         <header className="flex h-[60px] items-center justify-between border-b border-gray-200 bg-gray-50 px-5 dark:border-zinc-700/80 dark:bg-zinc-950">
           <div className="flex items-center gap-2.5">
