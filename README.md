@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-16 14:41 | v2.11.7 (PATCH) | Core | `.github/workflows/auto-fix-selectors.yml` <!-- auto:f1a32c508036 -->
 - 2026-03-16 14:33 | v2.11.6 (PATCH) | Core | `.github/workflows/auto-fix-selectors.yml` <!-- auto:72bbcf71cc7f -->
 - 2026-03-16 14:28 | v2.11.5 (PATCH) | Core | `.github/workflows/auto-fix-selectors.yml`, `.github/workflows/e2e-monitor.yml`, `.github/workflows/retry-failed.yml` <!-- auto:0845865a50df -->
 - 2026-03-14 09:00 | v2.11.4 (PATCH) | Core | `.github/workflows/e2e-monitor.yml`, `.github/workflows/retry-failed.yml` <!-- auto:19843862dfd1 -->
@@ -37,7 +38,6 @@
 - 2026-03-12 15:51 | v2.9.0 (MINOR) | Content Script / Manifest/Permissions / Core | `content.js`, `manifest.json`, `src/content/adapters/chatgpt.js`, `src/content/adapters/claude.js`, `src/content/adapters/deepseek.js`, `src/content/adapters/doubao.js`, +13 <!-- auto:f8ad4ef06b83 -->
 - 2026-03-12 14:48 | v2.8.0 (MINOR) | Popup UI / Background / Content Script / Core | `app/src/popup/Popup.jsx`, `background.js`, `content.js`, `selectors.json`, `src/content/index.js`, `src/content/selectors.js` <!-- auto:c967bde3ee04 -->
 - 2026-03-12 10:45 | v2.7.0 (MINOR) | UI Components / Core / Popup UI / Background / Content Script / Manifest/Permissions / Tooling | `app/src/index.css`, `app/src/lib/i18n.js`, `app/src/popup/Popup.jsx`, `background.js`, `content.js`, `manifest.json`, +6 <!-- auto:6d5d70f6bae5 -->
-- 2026-03-11 16:47 | v2.6.2 (PATCH) | Core | `check-workflows.sh` <!-- auto:5b3fe11124bb -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---

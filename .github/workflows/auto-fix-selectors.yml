@@ -213,7 +213,7 @@ jobs:
               repo: 'sendol-selectors',
               title: `Auto-fix: Update selectors for ${process.env.PLATFORMS}`,
               head: process.env.BRANCH,
-              base: 'master',
+              base: 'main',
               body,
             });
 
