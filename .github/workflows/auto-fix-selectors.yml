@@ -89,10 +89,14 @@ jobs:
             core.setOutput('blocked_count', blockedCount.toString());
 
       - name: Prepare auth state (optional)
-        if: steps.secrets.outputs.ready == 'true' && steps.breaker.outputs.blocked != 'true' && secrets.PLATFORM_AUTH_STATES_B64 != ''
+        if: steps.secrets.outputs.ready == 'true' && steps.breaker.outputs.blocked != 'true'
+        env:
+          AUTH_B64: ${{ secrets.PLATFORM_AUTH_STATES_B64 }}
         run: |
-          mkdir -p .auth
-          echo "${{ secrets.PLATFORM_AUTH_STATES_B64 }}" | base64 -d > .auth/storage-state.json
+          if [ -n "$AUTH_B64" ]; then
+            mkdir -p .auth
+            echo "$AUTH_B64" | base64 -d > .auth/storage-state.json
+          fi
 
       - name: Discover selectors for failed platforms
         id: discover
