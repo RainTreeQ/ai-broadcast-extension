@@ -51,26 +51,16 @@ export const defaultSelectors = {
   },
   grok: {
     findInput: [
-      'div.ProseMirror[contenteditable="true"]',
-      'div.tiptap[contenteditable="true"]',
-      'textarea[placeholder]',
       'textarea',
+      'div.ProseMirror[contenteditable="true"]',
       'div[contenteditable="true"][role="textbox"]',
       'div[contenteditable="true"]'
     ],
     findSendBtn: [
-      'button[type="submit"][aria-label="提交"]',
-      'button[type="submit"][aria-label="Submit"]',
       'button[type="submit"]:not([disabled])',
-      'button[aria-label="Submit"]:not([disabled])',
-      'button[aria-label="提交"]:not([disabled])',
-      'button[aria-label*="Submit"]:not([disabled])',
-      'button[aria-label*="Send"]:not([disabled])',
-      'button[data-testid*="send"]:not([disabled])',
-      '[role="button"][aria-label*="Send"]:not([aria-disabled="true"])',
-      '[role="button"][aria-label*="Submit"]:not([aria-disabled="true"])',
-      '[data-testid*="send"]',
-      '[data-testid*="submit"]'
+      'button[aria-label="Submit"]',
+      'button[aria-label="提交"]',
+      'button[type="submit"]'
     ]
   },
   deepseek: {

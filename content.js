@@ -165,26 +165,16 @@
     },
     grok: {
       findInput: [
-        'div.ProseMirror[contenteditable="true"]',
-        'div.tiptap[contenteditable="true"]',
-        "textarea[placeholder]",
         "textarea",
+        'div.ProseMirror[contenteditable="true"]',
         'div[contenteditable="true"][role="textbox"]',
         'div[contenteditable="true"]'
       ],
       findSendBtn: [
-        'button[type="submit"][aria-label="\u63D0\u4EA4"]',
-        'button[type="submit"][aria-label="Submit"]',
         'button[type="submit"]:not([disabled])',
-        'button[aria-label="Submit"]:not([disabled])',
-        'button[aria-label="\u63D0\u4EA4"]:not([disabled])',
-        'button[aria-label*="Submit"]:not([disabled])',
-        'button[aria-label*="Send"]:not([disabled])',
-        'button[data-testid*="send"]:not([disabled])',
-        '[role="button"][aria-label*="Send"]:not([aria-disabled="true"])',
-        '[role="button"][aria-label*="Submit"]:not([aria-disabled="true"])',
-        '[data-testid*="send"]',
-        '[data-testid*="submit"]'
+        'button[aria-label="Submit"]',
+        'button[aria-label="\u63D0\u4EA4"]',
+        'button[type="submit"]'
       ]
     },
     deepseek: {
@@ -401,7 +391,7 @@
       setContentEditable,
       findSendBtnForPlatform: findSendBtnForPlatform2,
       findSendBtnHeuristically: findSendBtnHeuristically2,
-      pressEnterOn: pressEnterOn2,
+      pressEnterOn,
       sleep,
       normalizeText,
       getContent
@@ -467,9 +457,9 @@
         const target = el || document.activeElement;
         if (target) {
           target.focus();
-          pressEnterOn2(target);
+          pressEnterOn(target);
         } else {
-          pressEnterOn2(null);
+          pressEnterOn(null);
         }
       }
     };
@@ -484,7 +474,7 @@
       setContentEditable,
       findSendBtnForPlatform: findSendBtnForPlatform2,
       findSendBtnHeuristically: findSendBtnHeuristically2,
-      pressEnterOn: pressEnterOn2
+      pressEnterOn
     } = deps;
     return {
       name: "Claude",
@@ -512,7 +502,7 @@
         const input = el || document.activeElement;
         if (input) {
           input.focus();
-          pressEnterOn2(input);
+          pressEnterOn(input);
         }
       }
     };
@@ -528,7 +518,7 @@
       setContentEditable,
       findSendBtnForPlatform: findSendBtnForPlatform2,
       findSendBtnHeuristically: findSendBtnHeuristically2,
-      pressEnterOn: pressEnterOn2
+      pressEnterOn
     } = deps;
     return {
       name: "DeepSeek",
@@ -546,7 +536,7 @@
         }
         if (el) {
           el.focus();
-          pressEnterOn2(el);
+          pressEnterOn(el);
         }
       }
     };
@@ -562,7 +552,7 @@
       setContentEditable,
       findSendBtnForPlatform: findSendBtnForPlatform2,
       findSendBtnHeuristically: findSendBtnHeuristically2,
-      pressEnterOn: pressEnterOn2
+      pressEnterOn
     } = deps;
     return {
       name: "Mistral",
@@ -579,7 +569,7 @@
         }
         if (el) {
           el.focus();
-          pressEnterOn2(el);
+          pressEnterOn(el);
         }
       }
     };
@@ -595,7 +585,7 @@
       sleep,
       normalizeText,
       getContent,
-      pressEnterOn: pressEnterOn2,
+      pressEnterOn,
       findSendBtnForPlatform: findSendBtnForPlatform2
     } = deps;
     return {
@@ -610,7 +600,7 @@
           const target = el || document.activeElement;
           if (!target) return false;
           target.focus();
-          pressEnterOn2(target);
+          pressEnterOn(target);
           await sleep(220);
           let after = normalizeText(getContent(target));
           if (!before || after !== before) return true;
@@ -674,417 +664,53 @@
   function createGrokAdapter(deps) {
     const {
       findInputForPlatform: findInputForPlatform2,
+      findInputHeuristically: findInputHeuristically2,
       waitFor,
       setReactValue,
       setContentEditable,
       findSendBtnForPlatform: findSendBtnForPlatform2,
-      normalizeText,
-      getContent,
+      findSendBtnHeuristically: findSendBtnHeuristically2,
+      pressEnterOn,
       sleep,
-      isNodeDisabled
+      normalizeText,
+      getContent
     } = deps;
     return {
       name: "Grok",
       findInput: async () => {
-        const isVisibleInput = (el) => {
-          if (!el || el.disabled || el.readOnly) return false;
-          const style = window.getComputedStyle(el);
-          if (style.display === "none" || style.visibility === "hidden") return false;
-          const rect = el.getBoundingClientRect();
-          return rect.width > 60 && rect.height > 1 && rect.bottom > 0;
-        };
-        const collectRoots = () => {
-          const roots = [document];
-          const queue = [document.documentElement];
-          const seen = /* @__PURE__ */ new Set();
-          while (queue.length) {
-            const node = queue.shift();
-            if (!node || seen.has(node)) continue;
-            seen.add(node);
-            if (node.shadowRoot) roots.push(node.shadowRoot);
-            if (node.children) {
-              for (const child of node.children) queue.push(child);
-            }
-          }
-          return roots;
-        };
-        const pickBestInput = () => {
-          const candidates = [];
-          for (const root of collectRoots()) {
-            candidates.push(...root.querySelectorAll('div.ProseMirror[contenteditable="true"], div.tiptap[contenteditable="true"], textarea[placeholder], textarea, div[contenteditable="true"][role="textbox"], div[contenteditable="true"]'));
-          }
-          const unique = [];
-          const seen = /* @__PURE__ */ new Set();
-          for (const c of candidates) {
-            if (!c || seen.has(c)) continue;
-            seen.add(c);
-            unique.push(c);
-          }
-          const scoreInput = (el) => {
-            if (!isVisibleInput(el)) return -1;
-            const rect = el.getBoundingClientRect();
-            const cls = String(el.className || "").toLowerCase();
-            const placeholder = (el.getAttribute("placeholder") || "").toLowerCase();
-            const root = el.closest("form") || el.parentElement || document;
-            let score = 0;
-            if (el.matches?.('div.ProseMirror[contenteditable="true"]') || cls.includes("prosemirror") || cls.includes("tiptap")) score += 8;
-            if (placeholder.includes("ask") || placeholder.includes("mind") || placeholder.includes("message")) score += 4;
-            if (el.closest("form")) score += 3;
-            if (root.querySelector?.('button[type="submit"], button[aria-label*="Submit"], button[aria-label*="Send"], button[data-testid*="send"], [role="button"][aria-label*="Send"], [data-testid*="send"]')) score += 3;
-            if (rect.top > 40 && rect.top < window.innerHeight) score += 2;
-            score += Math.min(4, Math.round(rect.width / 320));
-            return score;
-          };
-          let best = null;
-          let bestScore = -1;
-          for (const candidate of unique) {
-            const score = scoreInput(candidate);
-            if (score > bestScore) {
-              bestScore = score;
-              best = candidate;
-            }
-          }
-          return bestScore >= 0 ? best : null;
-        };
         const bySelectors = await findInputForPlatform2("grok");
-        if (isVisibleInput(bySelectors)) return bySelectors;
-        if (bySelectors && bySelectors.tagName === "TEXTAREA") return bySelectors;
-        const found = await waitFor(() => pickBestInput(), 7e3, 60);
-        if (found) return found;
-        const fallbackTextarea = document.querySelector("textarea");
-        if (fallbackTextarea) return fallbackTextarea;
-        return null;
+        if (bySelectors) return bySelectors;
+        return waitFor(() => findInputHeuristically2(), 7e3, 60);
       },
       async inject(el, text, options) {
-        const expected = normalizeText(text);
-        const verifyAfterFlush = async (waitMs = 150) => {
-          await sleep(waitMs);
-          const actual = normalizeText(getContent(el));
-          if (!expected) return actual.length === 0;
-          if (!actual) return false;
-          if (actual === expected) return true;
-          if (actual.length < Math.floor(expected.length * 0.8)) return false;
-          return actual.includes(expected) || expected.includes(actual);
-        };
-        const clearEditor = async () => {
-          el.focus();
-          await sleep(20);
-          document.execCommand("selectAll", false, null);
-          document.execCommand("delete", false, null);
-          await sleep(16);
-        };
-        const tryPasteEvent = async () => {
-          await clearEditor();
-          const dt = new DataTransfer();
-          dt.setData("text/plain", text);
-          dt.setData("text/html", `<p>${text.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`);
-          el.dispatchEvent(new ClipboardEvent("paste", {
-            clipboardData: dt,
-            bubbles: true,
-            cancelable: true,
-            composed: true
-          }));
-          return verifyAfterFlush(300);
-        };
-        const tryRealClipboardPaste = async () => {
-          await clearEditor();
-          try {
-            await navigator.clipboard.writeText(text);
-          } catch (_) {
-            return false;
-          }
-          document.execCommand("paste");
-          return verifyAfterFlush(300);
-        };
-        const tryInputEventPaste = async () => {
-          await clearEditor();
-          const dt = new DataTransfer();
-          dt.setData("text/plain", text);
-          try {
-            el.dispatchEvent(new InputEvent("beforeinput", {
-              inputType: "insertFromPaste",
-              dataTransfer: dt,
-              bubbles: true,
-              cancelable: true,
-              composed: true
-            }));
-          } catch (_) {
-            return false;
-          }
-          return verifyAfterFlush(300);
-        };
-        const tryExecInsert = async () => {
-          await clearEditor();
-          document.execCommand("insertText", false, text);
-          return verifyAfterFlush(400);
-        };
-        if (el.tagName === "TEXTAREA") {
-          el.focus();
-          await sleep(20);
-          el.select();
-          el.dispatchEvent(new KeyboardEvent("keydown", { key: "a", code: "KeyA", ctrlKey: true, bubbles: true, cancelable: true }));
-          el.dispatchEvent(new KeyboardEvent("keyup", { key: "a", code: "KeyA", ctrlKey: true, bubbles: true }));
-          el.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete", code: "Delete", bubbles: true, cancelable: true }));
-          el.dispatchEvent(new KeyboardEvent("keyup", { key: "Delete", code: "Delete", bubbles: true }));
-          await sleep(16);
-          const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
-          if (nativeSetter) nativeSetter.call(el, text);
-          else el.value = text;
-          const tracker = el._valueTracker;
-          if (tracker) tracker.setValue("");
-          el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
-          el.dispatchEvent(new Event("change", { bubbles: true }));
-          await sleep(60);
-          if (await verifyAfterFlush(200)) return { strategy: "grok-react-value", fallbackUsed: false };
+        if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") {
           setReactValue(el, text);
-          await sleep(80);
-          if (await verifyAfterFlush(200)) return { strategy: "grok-react-value-retry", fallbackUsed: true };
-          throw new Error("Grok textarea \u6CE8\u5165\u5931\u8D25");
+          return { strategy: "grok-react-value", fallbackUsed: false };
         }
-        try {
-          if (await tryPasteEvent()) return { strategy: "grok-paste-event", fallbackUsed: false };
-        } catch (_) {
-        }
-        try {
-          if (await tryRealClipboardPaste()) return { strategy: "grok-clipboard-paste", fallbackUsed: true };
-        } catch (_) {
-        }
-        try {
-          if (await tryInputEventPaste()) return { strategy: "grok-input-paste", fallbackUsed: true };
-        } catch (_) {
-        }
-        try {
-          if (await tryExecInsert()) return { strategy: "grok-exec-insert", fallbackUsed: true };
-        } catch (_) {
-        }
-        const meta = await setContentEditable(el, text, options);
-        await sleep(300);
-        if (await verifyAfterFlush(200)) return meta;
-        throw new Error("Grok \u8F93\u5165\u6CE8\u5165\u5931\u8D25\uFF1A\u6240\u6709\u7B56\u7565\u5747\u672A\u751F\u6548");
+        return setContentEditable(el, text, options);
       },
       async send(el, options) {
-        const logger = options?.logger;
-        const sendTrace = {
-          matchedBy: "none",
-          clicked: false,
-          formSubmitted: false,
-          keyAttempts: []
-        };
-        const isVisible = (node) => {
-          if (!node) return false;
-          const style = window.getComputedStyle(node);
-          if (style.display === "none" || style.visibility === "hidden") return false;
-          const rect = node.getBoundingClientRect();
-          return rect.width > 0 && rect.height > 0 && rect.bottom > 0;
-        };
-        const triggerClick = (node) => {
-          if (!node) return;
-          for (const evt of ["pointerdown", "mousedown", "pointerup", "mouseup", "click"]) {
-            try {
-              node.dispatchEvent(new MouseEvent(evt, { bubbles: true, cancelable: true, composed: true }));
-            } catch (_) {
-            }
+        const expected = normalizeText(options?.text || "");
+        const btn = await findSendBtnForPlatform2("grok") || await waitFor(() => findSendBtnHeuristically2(el), 3e3, 40);
+        if (btn) {
+          if (el?.tagName === "TEXTAREA" && expected) {
+            setReactValue(el, expected);
+            await sleep(60);
           }
-          try {
-            node.click?.();
-          } catch (_) {
-          }
-        };
-        const roots = () => {
-          const list = [
-            el?.closest("form"),
-            el?.closest(".ProseMirror")?.parentElement,
-            el?.closest(".ProseMirror")?.parentElement?.parentElement,
-            el?.closest('[class*="composer"]'),
-            el?.closest('[class*="editor"]'),
-            el?.parentElement,
-            el?.closest("main"),
-            document
-          ].filter(Boolean);
-          const uniq = [];
-          const seen = /* @__PURE__ */ new Set();
-          for (const root of list) {
-            if (seen.has(root)) continue;
-            seen.add(root);
-            uniq.push(root);
-          }
-          return uniq;
-        };
-        const tryFindBtn = () => {
-          const inputRect = el?.getBoundingClientRect ? el.getBoundingClientRect() : null;
-          for (const root of roots()) {
-            const buttons = root.querySelectorAll ? root.querySelectorAll('button, [role="button"], div[role="button"], span[role="button"], [data-testid*="send"], [data-testid*="submit"], [class*="send"][class*="button"], [class*="submit"][class*="button"]') : [];
-            let fallbackCandidate = null;
-            let proximityCandidate = null;
-            let proximityScore = -Infinity;
-            for (const button of buttons) {
-              if (!isVisible(button) || isNodeDisabled(button)) continue;
-              const hint = `${button.getAttribute("aria-label") || ""} ${button.getAttribute("title") || ""} ${button.getAttribute("data-testid") || ""} ${button.className || ""} ${(button.textContent || "").trim()}`.toLowerCase();
-              if (hint.includes("upload") || hint.includes("attach") || hint.includes("mic") || hint.includes("voice") || hint.includes("search") || hint.includes("plus")) continue;
-              if (hint.includes("submit") || hint.includes("send") || hint.includes("\u53D1\u9001") || hint.includes("\u63D0\u4EA4")) {
-                sendTrace.matchedBy = "hint:sendish";
-                return button;
-              }
-              if (!fallbackCandidate && (hint.includes("composer") || hint.includes("arrow") || hint.includes("paper-plane"))) {
-                fallbackCandidate = button;
-              }
-              if (!inputRect || !button.getBoundingClientRect) continue;
-              const r = button.getBoundingClientRect();
-              const centerX = r.left + r.width / 2;
-              const centerY = r.top + r.height / 2;
-              const dx = centerX - (inputRect.left + inputRect.width);
-              const dy = centerY - (inputRect.top + inputRect.height / 2);
-              const nearHorizontally = dx >= -80 && dx <= 420;
-              const nearVertically = Math.abs(dy) <= 240;
-              if (!nearHorizontally || !nearVertically) continue;
-              let score = 0;
-              score -= Math.abs(dx) * 0.3;
-              score -= Math.abs(dy) * 0.2;
-              if (r.width >= 18 && r.width <= 84 && r.height >= 18 && r.height <= 84) score += 12;
-              if (button.querySelector?.("svg")) score += 8;
-              if ((button.textContent || "").trim().length === 0) score += 6;
-              if ((button.getAttribute("aria-label") || "").trim()) score += 4;
-              if (score > proximityScore) {
-                proximityScore = score;
-                proximityCandidate = button;
-              }
-            }
-            if (fallbackCandidate) {
-              sendTrace.matchedBy = "hint:fallback-candidate";
-              return fallbackCandidate;
-            }
-            if (proximityCandidate) {
-              sendTrace.matchedBy = "proximity";
-              return proximityCandidate;
-            }
-          }
-          return null;
-        };
-        const GROK_SEND_SVG_PATH = "M6 11L12 5";
-        const findGrokSubmitBtn = () => {
-          const allSubmits = document.querySelectorAll('button[type="submit"]');
-          for (const b of allSubmits) {
-            const ariaLabel = (b.getAttribute("aria-label") || "").toLowerCase();
-            if (ariaLabel === "submit" || ariaLabel === "\u63D0\u4EA4") return b;
-            const svgPath = b.querySelector("svg path")?.getAttribute("d") || "";
-            if (svgPath.startsWith(GROK_SEND_SVG_PATH)) return b;
-          }
-          return null;
-        };
-        const forceEnableBtn = (b) => {
-          if (!b) return;
-          b.disabled = false;
-          b.removeAttribute("disabled");
-          let parent = b.parentElement;
-          for (let i = 0; i < 3 && parent; i++) {
-            if (parent.classList?.contains("hidden")) {
-              parent.classList.remove("hidden");
-              parent.style.display = "";
-            }
-            parent = parent.parentElement;
-          }
-        };
-        const selectorBtn = await findSendBtnForPlatform2("grok");
-        let btn = selectorBtn || await waitFor(tryFindBtn, 2e3, 40);
-        if (!btn) {
-          const grokBtn = findGrokSubmitBtn();
-          if (grokBtn) {
-            forceEnableBtn(grokBtn);
-            await sleep(50);
-            btn = grokBtn;
-            sendTrace.matchedBy = "grok-force-enable";
-          }
+          btn.click();
+          return;
         }
         const target = el || document.activeElement;
-        const expected = normalizeText(options?.text || "");
-        const before = normalizeText(getContent(target)) || expected;
-        const threadSel = 'main, [class*="conversation"], [class*="messages"], [class*="chat-content"]';
-        const threadSnapshotBefore = expected.length >= 4 ? normalizeText((document.querySelector(threadSel)?.innerText || document.body.innerText || "").slice(0, 6e3)) : "";
-        const confirmSendCheck = () => {
-          const after = normalizeText(getContent(target));
-          if (before && after !== before) return true;
-          if (expected.length >= 4 && threadSnapshotBefore) {
-            const threadNow = normalizeText((document.querySelector(threadSel)?.innerText || document.body.innerText || "").slice(0, 6e3));
-            if (threadNow !== threadSnapshotBefore && threadNow.includes(expected.slice(0, Math.min(expected.length, 20)))) return true;
-          }
-          return false;
-        };
-        const waitForConfirm = async (maxMs = 2e3) => {
-          const interval = 50;
-          const maxAttempts = Math.ceil(maxMs / interval);
-          for (let i = 0; i < maxAttempts; i++) {
-            if (confirmSendCheck()) return true;
-            await sleep(interval);
-          }
-          return false;
-        };
-        const tryKeySend = async () => {
-          if (!target) return false;
-          target.focus();
-          if (target.tagName === "TEXTAREA" && expected) {
-            const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
-            if (nativeSetter) nativeSetter.call(target, expected);
-            else target.value = expected;
-            const tracker = target._valueTracker;
-            if (tracker) tracker.setValue("");
-            target.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: expected }));
-            target.dispatchEvent(new Event("change", { bubbles: true }));
-            await sleep(80);
-          }
-          const attempts = [
-            { ctrlKey: false, metaKey: false, tag: "enter" },
-            { ctrlKey: true, metaKey: false, tag: "ctrl-enter" },
-            { ctrlKey: false, metaKey: true, tag: "meta-enter" }
-          ];
-          for (const attempt of attempts) {
-            const kOpts = { key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true, cancelable: true, composed: true, ctrlKey: attempt.ctrlKey, metaKey: attempt.metaKey };
-            target.dispatchEvent(new KeyboardEvent("keydown", kOpts));
-            target.dispatchEvent(new KeyboardEvent("keypress", kOpts));
-            target.dispatchEvent(new KeyboardEvent("keyup", kOpts));
-            await sleep(220);
-            sendTrace.keyAttempts.push(attempt.tag);
-            if (confirmSendCheck()) return true;
-            logger?.debug("grok-send-key-no-change", { mode: attempt.tag });
-          }
-          return false;
-        };
-        const tryFormSubmit = async () => {
-          const form = target?.closest?.("form");
-          if (!form) return false;
-          try {
-            if (typeof form.requestSubmit === "function") form.requestSubmit();
-            else form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-          } catch (_) {
-          }
-          sendTrace.formSubmitted = true;
-          await sleep(220);
-          return confirmSendCheck();
-        };
-        if (btn) {
-          if (target?.tagName === "TEXTAREA" && expected) {
-            const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
-            if (nativeSetter) nativeSetter.call(target, expected);
-            else target.value = expected;
-            const tracker = target._valueTracker;
-            if (tracker) tracker.setValue("");
-            target.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: expected }));
-            target.dispatchEvent(new Event("change", { bubbles: true }));
-            await sleep(80);
-          }
-          triggerClick(btn);
-          sendTrace.clicked = true;
-          await sleep(220);
-          if (confirmSendCheck()) return true;
-          logger?.debug("grok-send-click-no-confirm");
-          if (await tryFormSubmit()) return true;
-          if (await tryKeySend()) return true;
-          throw new Error(`Grok\u53D1\u9001\u672A\u6267\u884C matched=${sendTrace.matchedBy} clicked=${sendTrace.clicked} form=${sendTrace.formSubmitted} keys=${sendTrace.keyAttempts.join(",") || "none"}`);
+        if (!target) {
+          pressEnterOn(null);
+          return;
         }
-        if (await tryKeySend()) return true;
+        if (target.tagName === "TEXTAREA" && expected) {
+          setReactValue(target, expected);
+          await sleep(60);
+        }
+        target.focus();
         pressEnterOn(target);
-        await sleep(180);
-        if (confirmSendCheck()) return true;
-        throw new Error(`Grok\u53D1\u9001\u672A\u6267\u884C matched=${sendTrace.matchedBy} clicked=${sendTrace.clicked} form=${sendTrace.formSubmitted} keys=${sendTrace.keyAttempts.join(",") || "none"}`);
       }
     };
   }
@@ -1099,7 +725,7 @@
       setContentEditable,
       findSendBtnForPlatform: findSendBtnForPlatform2,
       findSendBtnHeuristically: findSendBtnHeuristically2,
-      pressEnterOn: pressEnterOn2,
+      pressEnterOn,
       isDoubaoVerificationPage
     } = deps;
     return {
@@ -1129,7 +755,7 @@
         }
         if (el) {
           el.focus();
-          pressEnterOn2(el);
+          pressEnterOn(el);
         }
       }
     };
@@ -1694,7 +1320,7 @@
         return (el.value || "").trim();
       }
       return (el.innerText || el.textContent || "").trim();
-    }, pressEnterOn2 = function(el) {
+    }, pressEnterOn = function(el) {
       const target = el || document.activeElement;
       if (!target) return;
       const opts = {
@@ -2055,7 +1681,7 @@
       if (btn) btn.click();
       else {
         el?.focus();
-        pressEnterOn2(el);
+        pressEnterOn(el);
       }
     };
     const kimiSend = async (el) => {
@@ -2077,7 +1703,7 @@
       if (btn) btn.click();
       else {
         el?.focus();
-        pressEnterOn2(el);
+        pressEnterOn(el);
       }
     };
     const yuanbaoSend = async (el, options) => {
@@ -2115,7 +1741,7 @@
         if (!before || after !== before) return true;
       }
       el?.focus();
-      pressEnterOn2(el);
+      pressEnterOn(el);
       await sleep(220);
       const finalAfter = normalizeText(getContent(el));
       const sent = !before || finalAfter !== before;
@@ -2130,7 +1756,7 @@
       setContentEditable,
       findSendBtnForPlatform,
       findSendBtnHeuristically,
-      pressEnterOn: pressEnterOn2,
+      pressEnterOn,
       sleep,
       normalizeText,
       getContent
@@ -2142,7 +1768,7 @@
       setContentEditable,
       findSendBtnForPlatform,
       findSendBtnHeuristically,
-      pressEnterOn: pressEnterOn2
+      pressEnterOn
     });
     const deepseekAdapter = createDeepseekAdapter({
       findInputForPlatform,
@@ -2152,7 +1778,7 @@
       setContentEditable,
       findSendBtnForPlatform,
       findSendBtnHeuristically,
-      pressEnterOn: pressEnterOn2
+      pressEnterOn
     });
     const geminiAdapter = createGeminiAdapter({
       findInputForPlatform,
@@ -2162,7 +1788,7 @@
       sleep,
       normalizeText,
       getContent,
-      pressEnterOn: pressEnterOn2,
+      pressEnterOn,
       findSendBtnForPlatform
     });
     const grokAdapter = createGrokAdapter({
@@ -2174,7 +1800,7 @@
       normalizeText,
       getContent,
       sleep,
-      pressEnterOn: pressEnterOn2,
+      pressEnterOn,
       isNodeDisabled
     });
     const mistralAdapter = createMistralAdapter({
@@ -2185,7 +1811,7 @@
       setContentEditable,
       findSendBtnForPlatform,
       findSendBtnHeuristically,
-      pressEnterOn: pressEnterOn2
+      pressEnterOn
     });
     const doubaoAdapter = createDoubaoAdapter({
       findInputForPlatform,
@@ -2195,7 +1821,7 @@
       setContentEditable,
       findSendBtnForPlatform,
       findSendBtnHeuristically,
-      pressEnterOn: pressEnterOn2,
+      pressEnterOn,
       isDoubaoVerificationPage
     });
     const qianwenAdapter = createQianwenAdapter({

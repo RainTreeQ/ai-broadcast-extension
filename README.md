@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-16 20:13 | v2.29.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js`, `src/content/selectors.js` <!-- auto:0272220a197d -->
 - 2026-03-16 20:04 | v2.28.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/adapters/grok.js`, `src/content/core/injection.js` <!-- auto:d65b2156d711 -->
 - 2026-03-16 19:56 | v2.27.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/adapters/grok.js`, `src/content/core/injection.js` <!-- auto:05c89ee01de4 -->
 - 2026-03-16 19:49 | v2.26.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:9473aad6d2a1 -->
@@ -37,7 +38,6 @@
 - 2026-03-16 18:39 | v2.20.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/core/injection.js` <!-- auto:4b6e9f6695ed -->
 - 2026-03-16 18:30 | v2.19.0 (MINOR) | Content Script / Core | `content.js`, `src/content/core/injection.js` <!-- auto:4a015183fa49 -->
 - 2026-03-16 18:13 | v2.18.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/adapters/grok.js`, `src/content/core/injection.js`, `src/content/index.js`, `src/content/selectors.js` <!-- auto:a7e60ddd1feb -->
-- 2026-03-16 17:06 | v2.17.0 (MINOR) | Core / Popup UI | `app/popup.html`, `app/src/popup/Popup.jsx` <!-- auto:d26bfd268d46 -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---
