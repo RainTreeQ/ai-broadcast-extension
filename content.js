@@ -988,10 +988,11 @@
           }
         }
         const target = el || document.activeElement;
-        const before = normalizeText(getContent(target));
+        const expected = normalizeText(options?.text || "");
+        const before = normalizeText(getContent(target)) || expected;
         const confirmSendCheck = () => {
           const after = normalizeText(getContent(target));
-          if (!before || after !== before) return true;
+          if (before && after !== before) return true;
           return false;
         };
         const waitForConfirm = async (maxMs = 2e3) => {

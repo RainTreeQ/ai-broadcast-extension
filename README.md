@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-16 19:42 | v2.25.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:9e45adee36d4 -->
 - 2026-03-16 19:36 | v2.24.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/adapters/grok.js` <!-- auto:bf4f0512d549 -->
 - 2026-03-16 19:16 | v2.23.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:6e862092c367 -->
 - 2026-03-16 19:07 | v2.22.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:5618504c241c -->
@@ -37,7 +38,6 @@
 - 2026-03-16 16:48 | v2.16.0 (MINOR) | Manifest/Permissions / Core | `manifest.json`, `package.json` <!-- auto:0c8f1b2f947e -->
 - 2026-03-16 16:37 | v2.15.0 (MINOR) | Background / Content Script / Core | `background.js`, `content.js`, `src/content/core/utils.js`, `src/content/index.js`, `test-results.json` <!-- auto:3df9b82bd1ef -->
 - 2026-03-16 16:29 | v2.14.0 (MINOR) | Popup UI | `app/src/popup/Popup.jsx` <!-- auto:91dd9c02ddff -->
-- 2026-03-16 16:17 | v2.13.0 (MINOR) | Popup UI | `app/src/popup/Popup.jsx` <!-- auto:94b213bc4cd6 -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---
