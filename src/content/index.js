@@ -407,7 +407,10 @@ if (!window.__aiBroadcastLoaded) {
       setContentEditable,
       findSendBtnForPlatform,
       findSendBtnHeuristically,
-      pressEnterOn
+      pressEnterOn,
+      sleep,
+      normalizeText,
+      getContent
     });
 
     const claudeAdapter = createClaudeAdapter({

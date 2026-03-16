@@ -59,8 +59,11 @@ export const defaultSelectors = {
       'div[contenteditable="true"]'
     ],
     findSendBtn: [
+      'button[type="submit"][aria-label="提交"]',
+      'button[type="submit"][aria-label="Submit"]',
       'button[type="submit"]:not([disabled])',
       'button[aria-label="Submit"]:not([disabled])',
+      'button[aria-label="提交"]:not([disabled])',
       'button[aria-label*="Submit"]:not([disabled])',
       'button[aria-label*="Send"]:not([disabled])',
       'button[data-testid*="send"]:not([disabled])',

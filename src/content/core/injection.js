@@ -132,6 +132,14 @@ export function createInjectionTools(deps) {
     return verifyContent(el, text);
   }
 
+  async function clearElement(el) {
+    el.focus();
+    await sleep(8);
+    document.execCommand('selectAll', false, null);
+    document.execCommand('delete', false, null);
+    await sleep(8);
+  }
+
   async function runStrategies(el, strategyList, logger) {
     for (const strategy of strategyList) {
       try {
@@ -140,11 +148,13 @@ export function createInjectionTools(deps) {
           return { strategy: strategy.name, fallbackUsed: Boolean(strategy.fallbackUsed) };
         }
         logger.debug('inject-strategy-miss', { strategy: strategy.name });
+        await clearElement(el);
       } catch (err) {
         logger.debug('inject-strategy-error', {
           strategy: strategy.name,
           error: err.message
         });
+        try { await clearElement(el); } catch (_) {}
       }
     }
     throw new Error('输入注入失败');
@@ -345,7 +355,33 @@ export function createInjectionTools(deps) {
 
   const kimiInject = async (el, text, options) => {
     if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') return setReactValue(el, text);
-    return setContentEditable(el, text, options);
+    const { logger } = options || {};
+
+    const tryKimiPaste = async () => {
+      el.focus();
+      await sleep(20);
+      document.execCommand('selectAll', false, null);
+      document.execCommand('delete', false, null);
+      await sleep(16);
+      const dt = new DataTransfer();
+      dt.setData('text/plain', text);
+      dt.setData('text/html', `<p>${text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>`);
+      el.dispatchEvent(new ClipboardEvent('paste', {
+        clipboardData: dt,
+        bubbles: true,
+        cancelable: true,
+        composed: true
+      }));
+      return verifyContent(el, text, 400, 30);
+    };
+
+    return runStrategies(el, [
+      { name: 'kimi-paste', fallbackUsed: false, run: tryKimiPaste },
+      { name: 'kimi-insertText', fallbackUsed: false, run: () => tryInsertText(el, text) },
+      { name: 'kimi-clipboard', fallbackUsed: true, run: () => tryClipboardPaste(el, text) },
+      { name: 'kimi-datatransfer', fallbackUsed: true, run: () => tryDataTransferPaste(el, text) },
+      { name: 'kimi-direct-dom', fallbackUsed: true, run: () => tryDirectDom(el, text) }
+    ], logger);
   };
 
   const yuanbaoInject = async (el, text, options) => {

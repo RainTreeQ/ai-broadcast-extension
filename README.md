@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-16 18:13 | v2.18.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/adapters/grok.js`, `src/content/core/injection.js`, `src/content/index.js`, `src/content/selectors.js` <!-- auto:a7e60ddd1feb -->
 - 2026-03-16 17:06 | v2.17.0 (MINOR) | Core / Popup UI | `app/popup.html`, `app/src/popup/Popup.jsx` <!-- auto:d26bfd268d46 -->
 - 2026-03-16 16:48 | v2.16.0 (MINOR) | Manifest/Permissions / Core | `manifest.json`, `package.json` <!-- auto:0c8f1b2f947e -->
 - 2026-03-16 16:37 | v2.15.0 (MINOR) | Background / Content Script / Core | `background.js`, `content.js`, `src/content/core/utils.js`, `src/content/index.js`, `test-results.json` <!-- auto:3df9b82bd1ef -->
@@ -37,7 +38,6 @@
 - 2026-03-16 14:41 | v2.11.7 (PATCH) | Core | `.github/workflows/auto-fix-selectors.yml` <!-- auto:f1a32c508036 -->
 - 2026-03-16 14:33 | v2.11.6 (PATCH) | Core | `.github/workflows/auto-fix-selectors.yml` <!-- auto:72bbcf71cc7f -->
 - 2026-03-16 14:28 | v2.11.5 (PATCH) | Core | `.github/workflows/auto-fix-selectors.yml`, `.github/workflows/e2e-monitor.yml`, `.github/workflows/retry-failed.yml` <!-- auto:0845865a50df -->
-- 2026-03-14 09:00 | v2.11.4 (PATCH) | Core | `.github/workflows/e2e-monitor.yml`, `.github/workflows/retry-failed.yml` <!-- auto:19843862dfd1 -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---

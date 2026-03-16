@@ -19,7 +19,7 @@ export function createGrokAdapter(deps) {
         const style = window.getComputedStyle(el);
         if (style.display === 'none' || style.visibility === 'hidden') return false;
         const rect = el.getBoundingClientRect();
-        return rect.width > 120 && rect.height > 20 && rect.bottom > 0;
+        return rect.width > 60 && rect.height > 1 && rect.bottom > 0;
       };
 
       const collectRoots = () => {
@@ -82,7 +82,12 @@ export function createGrokAdapter(deps) {
 
       const bySelectors = await findInputForPlatform('grok');
       if (isVisibleInput(bySelectors)) return bySelectors;
-      return waitFor(() => pickBestInput(), 7000, 60);
+      if (bySelectors && bySelectors.tagName === 'TEXTAREA') return bySelectors;
+      const found = await waitFor(() => pickBestInput(), 7000, 60);
+      if (found) return found;
+      const fallbackTextarea = document.querySelector('textarea');
+      if (fallbackTextarea) return fallbackTextarea;
+      return null;
     },
 
     async inject(el, text, options) {
@@ -167,9 +172,30 @@ export function createGrokAdapter(deps) {
 
       // Textarea fallback (Grok currently does not use textarea, but keep for safety)
       if (el.tagName === 'TEXTAREA') {
+        el.focus();
+        await sleep(30);
+        el.value = '';
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        await sleep(16);
+
         setReactValue(el, text);
-        await sleep(60);
+        await sleep(80);
         if (await verifyAfterFlush(200)) return { strategy: 'grok-react-value', fallbackUsed: false };
+
+        el.focus();
+        el.value = '';
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        await sleep(16);
+        for (let i = 0; i < text.length; i++) {
+          el.dispatchEvent(new KeyboardEvent('keydown', { key: text[i], bubbles: true }));
+          el.value += text[i];
+          el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: text[i] }));
+          el.dispatchEvent(new KeyboardEvent('keyup', { key: text[i], bubbles: true }));
+          if (i % 20 === 19) await sleep(1);
+        }
+        await sleep(80);
+        if (await verifyAfterFlush(200)) return { strategy: 'grok-char-by-char', fallbackUsed: true };
+
         throw new Error('Grok textarea 注入失败');
       }
 
@@ -287,8 +313,48 @@ export function createGrokAdapter(deps) {
         return null;
       };
 
+      // Grok's submit button is hidden+disabled when React state hasn't registered
+      // the injected text. Find it by SVG path signature or aria-label regardless
+      // of disabled/hidden state, then force-enable before clicking.
+      const GROK_SEND_SVG_PATH = 'M6 11L12 5';
+      const findGrokSubmitBtn = () => {
+        const allSubmits = document.querySelectorAll('button[type="submit"]');
+        for (const b of allSubmits) {
+          const ariaLabel = (b.getAttribute('aria-label') || '').toLowerCase();
+          if (ariaLabel === 'submit' || ariaLabel === '提交') return b;
+          const svgPath = b.querySelector('svg path')?.getAttribute('d') || '';
+          if (svgPath.startsWith(GROK_SEND_SVG_PATH)) return b;
+        }
+        return null;
+      };
+
+      const forceEnableBtn = (b) => {
+        if (!b) return;
+        b.disabled = false;
+        b.removeAttribute('disabled');
+        // Unhide parent container (Grok wraps it in a div with class "hidden")
+        let parent = b.parentElement;
+        for (let i = 0; i < 3 && parent; i++) {
+          if (parent.classList?.contains('hidden')) {
+            parent.classList.remove('hidden');
+            parent.style.display = '';
+          }
+          parent = parent.parentElement;
+        }
+      };
+
       const selectorBtn = await findSendBtnForPlatform('grok');
-      const btn = selectorBtn || await waitFor(tryFindBtn, 3500, 40);
+      let btn = selectorBtn || await waitFor(tryFindBtn, 2000, 40);
+      // If normal search failed, find the hidden submit button and force-enable it
+      if (!btn) {
+        const grokBtn = findGrokSubmitBtn();
+        if (grokBtn) {
+          forceEnableBtn(grokBtn);
+          await sleep(50);
+          btn = grokBtn;
+          sendTrace.matchedBy = 'grok-force-enable';
+        }
+      }
       const target = el || document.activeElement;
       const before = normalizeText(getContent(target));
       const expected = normalizeText(options?.text || before);
@@ -329,6 +395,25 @@ export function createGrokAdapter(deps) {
         }
         return false;
       };
+
+      if (el?.tagName === 'TEXTAREA') {
+        el.focus();
+        await sleep(30);
+        el.dispatchEvent(new KeyboardEvent('keydown', {
+          key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
+          bubbles: true, cancelable: true, composed: true
+        }));
+        el.dispatchEvent(new KeyboardEvent('keypress', {
+          key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
+          bubbles: true, cancelable: true, composed: true
+        }));
+        el.dispatchEvent(new KeyboardEvent('keyup', {
+          key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
+          bubbles: true, cancelable: true, composed: true
+        }));
+        sendTrace.keyAttempts.push('enter-textarea');
+        if (await waitForConfirm(3000)) return true;
+      }
 
       if (!btn) {
         throw new Error(`Grok发送未执行 matched=${sendTrace.matchedBy} clicked=${sendTrace.clicked} form=${sendTrace.formSubmitted} keys=${sendTrace.keyAttempts.join(',') || 'none'}`);

@@ -173,8 +173,11 @@
         'div[contenteditable="true"]'
       ],
       findSendBtn: [
+        'button[type="submit"][aria-label="\u63D0\u4EA4"]',
+        'button[type="submit"][aria-label="Submit"]',
         'button[type="submit"]:not([disabled])',
         'button[aria-label="Submit"]:not([disabled])',
+        'button[aria-label="\u63D0\u4EA4"]:not([disabled])',
         'button[aria-label*="Submit"]:not([disabled])',
         'button[aria-label*="Send"]:not([disabled])',
         'button[data-testid*="send"]:not([disabled])',
@@ -398,7 +401,10 @@
       setContentEditable,
       findSendBtnForPlatform: findSendBtnForPlatform2,
       findSendBtnHeuristically: findSendBtnHeuristically2,
-      pressEnterOn
+      pressEnterOn,
+      sleep,
+      normalizeText,
+      getContent
     } = deps;
     return {
       name: "ChatGPT",
@@ -406,7 +412,38 @@
         return await findInputForPlatform2("chatgpt") || waitFor(() => findInputHeuristically2());
       },
       async inject(el, text, options) {
-        if (el.tagName === "TEXTAREA") return setReactValue(el, text);
+        if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") return setReactValue(el, text);
+        const isLexical = el.hasAttribute("data-lexical-editor") || el.closest("[data-lexical-editor]");
+        if (isLexical) {
+          el.focus();
+          await sleep(30);
+          document.execCommand("selectAll", false, null);
+          document.execCommand("delete", false, null);
+          await sleep(16);
+          const dt = new DataTransfer();
+          dt.setData("text/plain", text);
+          el.dispatchEvent(new ClipboardEvent("paste", {
+            clipboardData: dt,
+            bubbles: true,
+            cancelable: true,
+            composed: true
+          }));
+          await sleep(200);
+          const actual = normalizeText(getContent(el));
+          const expected = normalizeText(text);
+          if (actual && (actual.includes(expected.slice(0, 24)) || expected.includes(actual.slice(0, 24)))) {
+            return { strategy: "chatgpt-lexical-paste", fallbackUsed: false };
+          }
+          document.execCommand("selectAll", false, null);
+          document.execCommand("delete", false, null);
+          await sleep(16);
+          document.execCommand("insertText", false, text);
+          await sleep(200);
+          const actual2 = normalizeText(getContent(el));
+          if (actual2 && (actual2.includes(expected.slice(0, 24)) || expected.includes(actual2.slice(0, 24)))) {
+            return { strategy: "chatgpt-lexical-insertText", fallbackUsed: true };
+          }
+        }
         return setContentEditable(el, text, options);
       },
       async send(el) {
@@ -642,7 +679,7 @@
           const style = window.getComputedStyle(el);
           if (style.display === "none" || style.visibility === "hidden") return false;
           const rect = el.getBoundingClientRect();
-          return rect.width > 120 && rect.height > 20 && rect.bottom > 0;
+          return rect.width > 60 && rect.height > 1 && rect.bottom > 0;
         };
         const collectRoots = () => {
           const roots = [document];
@@ -699,7 +736,12 @@
         };
         const bySelectors = await findInputForPlatform2("grok");
         if (isVisibleInput(bySelectors)) return bySelectors;
-        return waitFor(() => pickBestInput(), 7e3, 60);
+        if (bySelectors && bySelectors.tagName === "TEXTAREA") return bySelectors;
+        const found = await waitFor(() => pickBestInput(), 7e3, 60);
+        if (found) return found;
+        const fallbackTextarea = document.querySelector("textarea");
+        if (fallbackTextarea) return fallbackTextarea;
+        return null;
       },
       async inject(el, text, options) {
         const expected = normalizeText(text);
@@ -765,9 +807,27 @@
           return verifyAfterFlush(400);
         };
         if (el.tagName === "TEXTAREA") {
+          el.focus();
+          await sleep(30);
+          el.value = "";
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          await sleep(16);
           setReactValue(el, text);
-          await sleep(60);
+          await sleep(80);
           if (await verifyAfterFlush(200)) return { strategy: "grok-react-value", fallbackUsed: false };
+          el.focus();
+          el.value = "";
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          await sleep(16);
+          for (let i = 0; i < text.length; i++) {
+            el.dispatchEvent(new KeyboardEvent("keydown", { key: text[i], bubbles: true }));
+            el.value += text[i];
+            el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text[i] }));
+            el.dispatchEvent(new KeyboardEvent("keyup", { key: text[i], bubbles: true }));
+            if (i % 20 === 19) await sleep(1);
+          }
+          await sleep(80);
+          if (await verifyAfterFlush(200)) return { strategy: "grok-char-by-char", fallbackUsed: true };
           throw new Error("Grok textarea \u6CE8\u5165\u5931\u8D25");
         }
         try {
@@ -883,8 +943,41 @@
           }
           return null;
         };
+        const GROK_SEND_SVG_PATH = "M6 11L12 5";
+        const findGrokSubmitBtn = () => {
+          const allSubmits = document.querySelectorAll('button[type="submit"]');
+          for (const b of allSubmits) {
+            const ariaLabel = (b.getAttribute("aria-label") || "").toLowerCase();
+            if (ariaLabel === "submit" || ariaLabel === "\u63D0\u4EA4") return b;
+            const svgPath = b.querySelector("svg path")?.getAttribute("d") || "";
+            if (svgPath.startsWith(GROK_SEND_SVG_PATH)) return b;
+          }
+          return null;
+        };
+        const forceEnableBtn = (b) => {
+          if (!b) return;
+          b.disabled = false;
+          b.removeAttribute("disabled");
+          let parent = b.parentElement;
+          for (let i = 0; i < 3 && parent; i++) {
+            if (parent.classList?.contains("hidden")) {
+              parent.classList.remove("hidden");
+              parent.style.display = "";
+            }
+            parent = parent.parentElement;
+          }
+        };
         const selectorBtn = await findSendBtnForPlatform2("grok");
-        const btn = selectorBtn || await waitFor(tryFindBtn, 3500, 40);
+        let btn = selectorBtn || await waitFor(tryFindBtn, 2e3, 40);
+        if (!btn) {
+          const grokBtn = findGrokSubmitBtn();
+          if (grokBtn) {
+            forceEnableBtn(grokBtn);
+            await sleep(50);
+            btn = grokBtn;
+            sendTrace.matchedBy = "grok-force-enable";
+          }
+        }
         const target = el || document.activeElement;
         const before = normalizeText(getContent(target));
         const expected = normalizeText(options?.text || before);
@@ -914,6 +1007,39 @@
           }
           return false;
         };
+        if (el?.tagName === "TEXTAREA") {
+          el.focus();
+          await sleep(30);
+          el.dispatchEvent(new KeyboardEvent("keydown", {
+            key: "Enter",
+            code: "Enter",
+            keyCode: 13,
+            which: 13,
+            bubbles: true,
+            cancelable: true,
+            composed: true
+          }));
+          el.dispatchEvent(new KeyboardEvent("keypress", {
+            key: "Enter",
+            code: "Enter",
+            keyCode: 13,
+            which: 13,
+            bubbles: true,
+            cancelable: true,
+            composed: true
+          }));
+          el.dispatchEvent(new KeyboardEvent("keyup", {
+            key: "Enter",
+            code: "Enter",
+            keyCode: 13,
+            which: 13,
+            bubbles: true,
+            cancelable: true,
+            composed: true
+          }));
+          sendTrace.keyAttempts.push("enter-textarea");
+          if (await waitForConfirm(3e3)) return true;
+        }
         if (!btn) {
           throw new Error(`Grok\u53D1\u9001\u672A\u6267\u884C matched=${sendTrace.matchedBy} clicked=${sendTrace.clicked} form=${sendTrace.formSubmitted} keys=${sendTrace.keyAttempts.join(",") || "none"}`);
         }
@@ -1218,6 +1344,13 @@
       el.dispatchEvent(new InputEvent("input", { inputType: "insertText", data: text, bubbles: true }));
       return verifyContent(el, text);
     }
+    async function clearElement(el) {
+      el.focus();
+      await sleep(8);
+      document.execCommand("selectAll", false, null);
+      document.execCommand("delete", false, null);
+      await sleep(8);
+    }
     async function runStrategies(el, strategyList, logger) {
       for (const strategy of strategyList) {
         try {
@@ -1226,11 +1359,16 @@
             return { strategy: strategy.name, fallbackUsed: Boolean(strategy.fallbackUsed) };
           }
           logger.debug("inject-strategy-miss", { strategy: strategy.name });
+          await clearElement(el);
         } catch (err) {
           logger.debug("inject-strategy-error", {
             strategy: strategy.name,
             error: err.message
           });
+          try {
+            await clearElement(el);
+          } catch (_) {
+          }
         }
       }
       throw new Error("\u8F93\u5165\u6CE8\u5165\u5931\u8D25");
@@ -1411,7 +1549,31 @@
     };
     const kimiInject = async (el, text, options) => {
       if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") return setReactValue(el, text);
-      return setContentEditable(el, text, options);
+      const { logger } = options || {};
+      const tryKimiPaste = async () => {
+        el.focus();
+        await sleep(20);
+        document.execCommand("selectAll", false, null);
+        document.execCommand("delete", false, null);
+        await sleep(16);
+        const dt = new DataTransfer();
+        dt.setData("text/plain", text);
+        dt.setData("text/html", `<p>${text.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`);
+        el.dispatchEvent(new ClipboardEvent("paste", {
+          clipboardData: dt,
+          bubbles: true,
+          cancelable: true,
+          composed: true
+        }));
+        return verifyContent(el, text, 400, 30);
+      };
+      return runStrategies(el, [
+        { name: "kimi-paste", fallbackUsed: false, run: tryKimiPaste },
+        { name: "kimi-insertText", fallbackUsed: false, run: () => tryInsertText(el, text) },
+        { name: "kimi-clipboard", fallbackUsed: true, run: () => tryClipboardPaste(el, text) },
+        { name: "kimi-datatransfer", fallbackUsed: true, run: () => tryDataTransferPaste(el, text) },
+        { name: "kimi-direct-dom", fallbackUsed: true, run: () => tryDirectDom(el, text) }
+      ], logger);
     };
     const yuanbaoInject = async (el, text, options) => {
       if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") return setReactValue(el, text);
@@ -1973,7 +2135,10 @@
       setContentEditable,
       findSendBtnForPlatform,
       findSendBtnHeuristically,
-      pressEnterOn
+      pressEnterOn,
+      sleep,
+      normalizeText,
+      getContent
     });
     const claudeAdapter = createClaudeAdapter({
       findInputForPlatform,
