@@ -6,10 +6,10 @@ export function createInjectionTools(deps) {
     getContent
   } = deps;
 
-  async function verifyContent(el, text, timeout = 280, interval = 25) {
-    const contentLooksInjected = (node, value) => {
-      const expected = normalizeText(value);
-      const actual = normalizeText(getContent(node));
+  async function verifyContent(el, text, timeout = 120, interval = 20) {
+    const expected = normalizeText(text);
+    const check = () => {
+      const actual = normalizeText(getContent(el));
       if (!expected) return actual.length === 0;
       if (!actual) return false;
       if (actual === expected) return true;
@@ -18,13 +18,13 @@ export function createInjectionTools(deps) {
       if (actual.length > expected.length * 1.35) return false;
       return actual.includes(expected.slice(0, Math.min(expected.length, 24)));
     };
-    return waitForCheck(() => contentLooksInjected(el, text), timeout, interval);
+    return waitForCheck(check, timeout, interval);
   }
 
-  async function verifyContentStrict(el, text, timeout = 200, interval = 25) {
-    const contentLooksInjectedStrict = (node, value) => {
-      const expected = normalizeText(value);
-      const actual = normalizeText(getContent(node));
+  async function verifyContentStrict(el, text, timeout = 120, interval = 20) {
+    const expected = normalizeText(text);
+    const check = () => {
+      const actual = normalizeText(getContent(el));
       if (!expected) return actual.length === 0;
       if (!actual) return false;
       if (actual === expected) return true;
@@ -33,7 +33,7 @@ export function createInjectionTools(deps) {
       if (actual.length > expected.length * 1.2) return false;
       return actual.includes(expected) || expected.includes(actual);
     };
-    return waitForCheck(() => contentLooksInjectedStrict(el, text), timeout, interval);
+    return waitForCheck(check, timeout, interval);
   }
 
   function setReactValue(el, value) {
@@ -52,18 +52,13 @@ export function createInjectionTools(deps) {
 
   async function tryInsertText(el, text) {
     el.focus();
-    await sleep(16);
+    await sleep(8);
     document.execCommand('selectAll', false, null);
     document.execCommand('delete', false, null);
-    await sleep(8);
     document.execCommand('insertText', false, text);
     const verified = await verifyContent(el, text);
     if (verified) {
-      el.dispatchEvent(new InputEvent('input', {
-        bubbles: true,
-        inputType: 'insertText',
-        data: text
-      }));
+      el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: text }));
     }
     return verified;
   }
@@ -71,7 +66,7 @@ export function createInjectionTools(deps) {
   async function tryClipboardPaste(el, text) {
     await navigator.clipboard.writeText(text);
     el.focus();
-    await sleep(12);
+    await sleep(8);
     document.execCommand('selectAll', false, null);
     document.execCommand('delete', false, null);
     document.execCommand('paste');
@@ -80,7 +75,7 @@ export function createInjectionTools(deps) {
 
   async function tryDataTransferPaste(el, text) {
     el.focus();
-    await sleep(12);
+    await sleep(8);
     document.execCommand('selectAll', false, null);
     document.execCommand('delete', false, null);
     const dt = new DataTransfer();
@@ -104,7 +99,7 @@ export function createInjectionTools(deps) {
 
   async function trySlateBeforeInput(el, text) {
     el.focus();
-    await sleep(20);
+    await sleep(10);
     const sel = window.getSelection();
     if (sel && el.childNodes.length > 0) {
       try {
@@ -114,7 +109,7 @@ export function createInjectionTools(deps) {
           bubbles: true,
           cancelable: true
         }));
-        await sleep(10);
+        await sleep(8);
       } catch (_) {}
     }
     const chunkSize = text.length > 30 ? 3 : 1;
@@ -126,7 +121,7 @@ export function createInjectionTools(deps) {
         bubbles: true,
         cancelable: true
       }));
-      await sleep(chunkSize > 1 ? 2 : 1);
+      if (i % 30 === 0) await sleep(1);
     }
     el.dispatchEvent(new InputEvent('input', { inputType: 'insertText', data: text, bubbles: true }));
     return verifyContent(el, text);
@@ -134,10 +129,8 @@ export function createInjectionTools(deps) {
 
   async function clearElement(el) {
     el.focus();
-    await sleep(8);
     document.execCommand('selectAll', false, null);
     document.execCommand('delete', false, null);
-    await sleep(8);
   }
 
   async function runStrategies(el, strategyList, logger, opts = {}) {
@@ -151,10 +144,7 @@ export function createInjectionTools(deps) {
         logger.debug('inject-strategy-miss', { strategy: strategy.name });
         if (!skipClear) await clearElement(el);
       } catch (err) {
-        logger.debug('inject-strategy-error', {
-          strategy: strategy.name,
-          error: err.message
-        });
+        logger.debug('inject-strategy-error', { strategy: strategy.name, error: err.message });
         if (!skipClear) { try { await clearElement(el); } catch (_) {} }
       }
     }
@@ -191,11 +181,7 @@ export function createInjectionTools(deps) {
   const GEMINI_CHUNK_SIZE = 1200;
 
   function notifyGeminiFramework(el, text) {
-    el.dispatchEvent(new InputEvent('input', {
-      bubbles: true,
-      inputType: 'insertText',
-      data: text
-    }));
+    el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: text }));
     el.dispatchEvent(new Event('change', { bubbles: true }));
     const richTextarea = el.closest('rich-textarea');
     if (richTextarea) {
@@ -212,9 +198,8 @@ export function createInjectionTools(deps) {
       return;
     }
     for (let i = 0; i < len; i += GEMINI_CHUNK_SIZE) {
-      const chunk = text.slice(i, i + GEMINI_CHUNK_SIZE);
-      document.execCommand('insertText', false, chunk);
-      await sleep(12);
+      document.execCommand('insertText', false, text.slice(i, i + GEMINI_CHUNK_SIZE));
+      await sleep(8);
     }
   }
 
@@ -222,7 +207,7 @@ export function createInjectionTools(deps) {
     const { logger } = options;
 
     el.focus();
-    await sleep(40);
+    await sleep(20);
 
     const richTextarea = el.closest('rich-textarea') || el.parentElement;
     const quill = richTextarea?.__quill || el.__quill;
@@ -233,25 +218,23 @@ export function createInjectionTools(deps) {
         quill.insertText(0, text, 'user');
       } else {
         for (let i = 0; i < text.length; i += GEMINI_CHUNK_SIZE) {
-          const chunk = text.slice(i, i + GEMINI_CHUNK_SIZE);
-          quill.insertText(i, chunk, 'user');
-          await sleep(10);
+          quill.insertText(i, text.slice(i, i + GEMINI_CHUNK_SIZE), 'user');
+          await sleep(8);
         }
       }
       quill.setSelection(text.length, 0);
       notifyGeminiFramework(el, text);
-      await sleep(30);
-      if (await verifyContentStrict(el, text, 300, 30)) {
+      await sleep(20);
+      if (await verifyContentStrict(el, text, 200, 20)) {
         return { strategy: 'gemini-quill', fallbackUsed: false };
       }
       quill.setText('');
-      await sleep(16);
     }
 
     document.execCommand('selectAll', false, null);
     document.execCommand('delete', false, null);
     await insertTextInChunks(el, text);
-    if (await verifyContentStrict(el, text, 250, 25)) {
+    if (await verifyContentStrict(el, text, 150, 20)) {
       notifyGeminiFramework(el, text);
       return { strategy: 'gemini-insertText', fallbackUsed: Boolean(quill) };
     }
@@ -259,7 +242,7 @@ export function createInjectionTools(deps) {
     document.execCommand('selectAll', false, null);
     document.execCommand('delete', false, null);
     await insertTextInChunks(el, text);
-    if (await verifyContentStrict(el, text, 250, 25)) {
+    if (await verifyContentStrict(el, text, 150, 20)) {
       notifyGeminiFramework(el, text);
       return { strategy: 'gemini-insertText-retry', fallbackUsed: true };
     }
@@ -269,7 +252,7 @@ export function createInjectionTools(deps) {
     p.textContent = text;
     el.appendChild(p);
     notifyGeminiFramework(el, text);
-    if (await verifyContentStrict(el, text, 200, 25)) {
+    if (await verifyContentStrict(el, text, 150, 20)) {
       return { strategy: 'gemini-direct-dom', fallbackUsed: true };
     }
 
@@ -279,7 +262,7 @@ export function createInjectionTools(deps) {
 
   async function setYuanbaoInput(el, text, options) {
     el.focus();
-    await sleep(28);
+    await sleep(16);
 
     const quill = el.__quill || el.closest('.ql-container')?.__quill || el.closest('.ql-editor')?.__quill;
     if (quill) {
@@ -288,7 +271,7 @@ export function createInjectionTools(deps) {
       quill.setSelection(text.length, 0);
       el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: text }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
-      if (await verifyContent(el, text, 260, 25)) {
+      if (await verifyContent(el, text, 150, 20)) {
         return { strategy: 'yuanbao-quill', fallbackUsed: false };
       }
     }
@@ -311,13 +294,13 @@ export function createInjectionTools(deps) {
     target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
     target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
     target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-    await sleep(120);
+    await sleep(80);
   }
 
   async function setQianwenInput(el, text, options) {
     const { logger } = options || {};
     el.focus();
-    await sleep(20);
+    await sleep(16);
 
     const slateNode = el.closest('[data-slate-editor="true"]') || el;
     const fiberKey = Object.keys(slateNode).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
@@ -330,12 +313,13 @@ export function createInjectionTools(deps) {
             try { editor.deleteFragment(); } catch (_) {}
             editor.insertText(text);
             el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: text }));
-            await sleep(80);
+            await sleep(60);
             const actual = normalizeText(getContent(el));
             const expected = normalizeText(text);
-            const ok = actual && (actual === expected || actual.includes(expected.slice(0, Math.min(expected.length, 20))));
-            if (ok) return { strategy: 'qianwen-slate-api', fallbackUsed: false };
-            break;
+            if (actual && (actual === expected || actual.includes(expected.slice(0, Math.min(expected.length, 20))))) {
+              return { strategy: 'qianwen-slate-api', fallbackUsed: false };
+            }
+            return { strategy: 'qianwen-slate-api-best-effort', fallbackUsed: false };
           }
           fiber = fiber.return;
         }
@@ -363,10 +347,9 @@ export function createInjectionTools(deps) {
 
     const tryKimiPaste = async () => {
       el.focus();
-      await sleep(20);
+      await sleep(16);
       document.execCommand('selectAll', false, null);
       document.execCommand('delete', false, null);
-      await sleep(16);
       const dt = new DataTransfer();
       dt.setData('text/plain', text);
       dt.setData('text/html', `<p>${text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>`);
@@ -376,7 +359,7 @@ export function createInjectionTools(deps) {
         cancelable: true,
         composed: true
       }));
-      return verifyContent(el, text, 400, 30);
+      return verifyContent(el, text, 250, 20);
     };
 
     return runStrategies(el, [

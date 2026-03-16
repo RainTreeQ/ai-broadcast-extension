@@ -40,7 +40,7 @@ export function createChatgptAdapter(deps) {
           cancelable: true,
           composed: true
         }));
-        await sleep(200);
+        await sleep(100);
         const actual = normalizeText(getContent(el));
         const expected = normalizeText(text);
         if (actual && (actual.includes(expected.slice(0, 24)) || expected.includes(actual.slice(0, 24)))) {
@@ -49,9 +49,9 @@ export function createChatgptAdapter(deps) {
 
         document.execCommand('selectAll', false, null);
         document.execCommand('delete', false, null);
-        await sleep(16);
+        await sleep(8);
         document.execCommand('insertText', false, text);
-        await sleep(200);
+        await sleep(100);
         const actual2 = normalizeText(getContent(el));
         if (actual2 && (actual2.includes(expected.slice(0, 24)) || expected.includes(actual2.slice(0, 24)))) {
           return { strategy: 'chatgpt-lexical-insertText', fallbackUsed: true };

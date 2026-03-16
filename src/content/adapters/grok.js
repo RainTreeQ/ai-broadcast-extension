@@ -95,7 +95,7 @@ export function createGrokAdapter(deps) {
       // Verify after a generous delay so ProseMirror has time to flush
       // its EditorState back to DOM. Checking too early gives false positives
       // because execCommand writes to DOM before PM overwrites it.
-      const verifyAfterFlush = async (waitMs = 300) => {
+      const verifyAfterFlush = async (waitMs = 150) => {
         await sleep(waitMs);
         const actual = normalizeText(getContent(el));
         if (!expected) return actual.length === 0;
@@ -363,22 +363,23 @@ export function createGrokAdapter(deps) {
       const target = el || document.activeElement;
       const expected = normalizeText(options?.text || '');
       const before = normalizeText(getContent(target)) || expected;
+      const threadSel = 'main, [class*="conversation"], [class*="messages"], [class*="chat-content"]';
       const threadSnapshotBefore = expected.length >= 4
-        ? normalizeText((document.querySelector('[class*="conversation"], [class*="messages"], main')?.innerText || document.body.innerText || '').slice(0, 8000))
+        ? normalizeText((document.querySelector(threadSel)?.innerText || document.body.innerText || '').slice(0, 6000))
         : '';
 
       const confirmSendCheck = () => {
         const after = normalizeText(getContent(target));
         if (before && after !== before) return true;
         if (expected.length >= 4 && threadSnapshotBefore) {
-          const threadNow = normalizeText((document.querySelector('[class*="conversation"], [class*="messages"], main')?.innerText || document.body.innerText || '').slice(0, 8000));
+          const threadNow = normalizeText((document.querySelector(threadSel)?.innerText || document.body.innerText || '').slice(0, 6000));
           if (threadNow !== threadSnapshotBefore && threadNow.includes(expected.slice(0, Math.min(expected.length, 20)))) return true;
         }
         return false;
       };
 
       const waitForConfirm = async (maxMs = 2000) => {
-        const interval = 100;
+        const interval = 50;
         const maxAttempts = Math.ceil(maxMs / interval);
         for (let i = 0; i < maxAttempts; i++) {
           if (confirmSendCheck()) return true;
