@@ -352,12 +352,16 @@ if (!window.__aiBroadcastLoaded) {
       else { el?.focus(); pressEnterOn(el); }
     };
 
-    const kimiSend = async (el) => {
+    const kimiSend = async (el, options) => {
+      const logger = options?.logger;
+      const before = normalizeText(getContent(el));
       const selectorBtn = await findSendBtnForPlatform('kimi');
       if (selectorBtn) {
         const innerBtn = selectorBtn.tagName !== 'BUTTON' ? selectorBtn.querySelector('button') : null;
         (innerBtn || selectorBtn).click();
-        return;
+        await sleep(400);
+        const after = normalizeText(getContent(el));
+        if (!before || after !== before) return true;
       }
       const container = el?.closest('form') || el?.closest('div[class*="input"]') || el?.closest('div[class*="chat"]') || document;
       const findSendBtn = () => {
@@ -369,8 +373,20 @@ if (!window.__aiBroadcastLoaded) {
         return null;
       };
       const btn = await waitFor(findSendBtn, 3500, 40);
-      if (btn) btn.click();
-      else { el?.focus(); pressEnterOn(el); }
+      if (btn) {
+        btn.click();
+        await sleep(400);
+        const after = normalizeText(getContent(el));
+        if (!before || after !== before) return true;
+      } else {
+        el?.focus();
+        pressEnterOn(el);
+        await sleep(400);
+        const after = normalizeText(getContent(el));
+        if (!before || after !== before) return true;
+      }
+      logger?.debug?.('kimi-send-no-change');
+      return false;
     };
 
     const yuanbaoSend = async (el, options) => {

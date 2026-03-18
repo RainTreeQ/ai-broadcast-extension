@@ -25,7 +25,7 @@ git push -u origin main
 
 Then update `background.js` line 2:
 ```javascript
-const CLOUD_SELECTORS_URL = "https://raw.githubusercontent.com/YOUR_USERNAME/sendol-selectors/main/selectors.json";
+const CLOUD_SELECTORS_URL = "https://raw.githubusercontent.com/YOUR_USERNAME/sendol-selectors/main/selectors/{platform}.json";
 ```
 
 ### Step 2: Configure Monitoring (3 min)
@@ -68,7 +68,7 @@ The extension will now:
 
 ```bash
 npm run diagnose <platform>    # Debug a specific platform
-npm run validate:selectors     # Check selectors.json
+npm run validate:selectors     # Check selectors/
 npm run test:input             # Run E2E tests locally
 npm run package:extension      # Build for production
 ```
@@ -77,7 +77,7 @@ npm run package:extension      # Build for production
 
 1. You'll get an email from GitHub Actions
 2. Run: `npm run diagnose <platform>`
-3. Update `selectors.json` in your cloud repo
+3. Update selectors/ in your cloud repo
 4. Users auto-fix in 12 hours (no extension update!)
 
 **That's it! Enjoy your low-maintenance extension! 🎊**

@@ -15,8 +15,9 @@ cd "$REPO_DIR"
 # Initialize git
 git init
 
-# Copy selectors.json
-cp ../ai-broadcast-extension/selectors.json .
+# Copy selectors directory
+mkdir -p selectors
+cp -r ../ai-broadcast-extension/selectors/*.json selectors/
 
 # Create README
 cat > README.md << 'MDEOF'
@@ -30,7 +31,7 @@ When an AI platform changes its UI:
 
 1. Open the platform in your browser
 2. Open DevTools (F12) and find the new input field selector
-3. Update `selectors.json` with the new selector
+3. Update `selectors/{platform}.json` with the new selector
 4. Commit and push
 
 Example:
@@ -38,22 +39,31 @@ Example:
 # Test the selector in DevTools console first
 document.querySelector('YOUR_NEW_SELECTOR')
 
-# If it works, update selectors.json
-git add selectors.json
+# If it works, update the platform file
+vim selectors/chatgpt.json
+git add selectors/
 git commit -m "fix: update ChatGPT input selector"
 git push
 ```
 
 Users will automatically receive the update within 12 hours.
 
-## File Format
+## File Structure
 
+```
+selectors/
+  index.json          # Version and platform list
+  chatgpt.json        # ChatGPT selectors
+  claude.json         # Claude selectors
+  gemini.json         # Gemini selectors
+  ...
+```
+
+Each platform file:
 ```json
 {
-  "platformId": {
-    "findInput": ["selector1", "selector2"],
-    "findSendBtn": ["selector1", "selector2"]
-  }
+  "findInput": ["selector1", "selector2"],
+  "findSendBtn": ["selector1", "selector2"]
 }
 ```
 
@@ -78,5 +88,5 @@ echo "1. Create a new GitHub repository named '$REPO_NAME'"
 echo "2. Run: cd $REPO_DIR"
 echo "3. Run: git remote add origin https://github.com/YOUR_USERNAME/$REPO_NAME.git"
 echo "4. Run: git push -u origin main"
-echo "5. Update CLOUD_SELECTORS_URL in background.js to:"
-echo "   https://raw.githubusercontent.com/YOUR_USERNAME/$REPO_NAME/main/selectors.json"
+echo "5. The extension fetches from:"
+echo "   https://raw.githubusercontent.com/YOUR_USERNAME/$REPO_NAME/main/selectors/{platform}.json"

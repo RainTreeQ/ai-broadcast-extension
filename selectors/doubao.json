@@ -1,0 +1,14 @@
+{
+  "mode": "override",
+  "findInput": [
+    "textarea[placeholder]",
+    "div[contenteditable=\"true\"]",
+    "textarea"
+  ],
+  "findSendBtn": [
+    "button[type=\"submit\"]",
+    "button[aria-label*=\"发送\"]",
+    "button[aria-label*=\"Send\"]",
+    "button[data-testid*=\"send\"]"
+  ]
+}

@@ -261,10 +261,14 @@
         "textarea"
       ],
       findSendBtn: [
-        "div.send-button-container:not(.disabled) button",
+        // Kimi 2026: 发送按钮是 div.send-button-container，内部没有 button
         "div.send-button-container:not(.disabled)",
-        'div[class*="send-button-container"]:not(.disabled) button',
+        ".send-button-container",
         'div[class*="send-button-container"]:not(.disabled)',
+        // 向下兼容：旧版可能有内部 button
+        "div.send-button-container:not(.disabled) button",
+        'div[class*="send-button-container"]:not(.disabled) button',
+        // Fallback
         'button[class*="send"]:not([disabled])',
         'button[type="submit"]:not([disabled])',
         'button[aria-label*="\u53D1\u9001"]',
@@ -375,7 +379,7 @@
     checkNavigation();
     const cacheKey = `${platformId}:send`;
     const cached = getCached(cacheKey);
-    if (cached && !cached.disabled && cached.getAttribute("aria-disabled") !== "true") {
+    if (cached && cached.isConnected && !cached.disabled && cached.getAttribute("aria-disabled") !== "true") {
       return cached;
     }
     const selectors = await getDynamicSelectors();
@@ -1806,12 +1810,16 @@
         pressEnterOn(el);
       }
     };
-    const kimiSend = async (el) => {
+    const kimiSend = async (el, options) => {
+      const logger = options?.logger;
+      const before = normalizeText(getContent(el));
       const selectorBtn = await findSendBtnForPlatform("kimi");
       if (selectorBtn) {
         const innerBtn = selectorBtn.tagName !== "BUTTON" ? selectorBtn.querySelector("button") : null;
         (innerBtn || selectorBtn).click();
-        return;
+        await sleep(400);
+        const after = normalizeText(getContent(el));
+        if (!before || after !== before) return true;
       }
       const container = el?.closest("form") || el?.closest('div[class*="input"]') || el?.closest('div[class*="chat"]') || document;
       const findSendBtn = () => {
@@ -1823,11 +1831,20 @@
         return null;
       };
       const btn = await waitFor(findSendBtn, 3500, 40);
-      if (btn) btn.click();
-      else {
+      if (btn) {
+        btn.click();
+        await sleep(400);
+        const after = normalizeText(getContent(el));
+        if (!before || after !== before) return true;
+      } else {
         el?.focus();
         pressEnterOn(el);
+        await sleep(400);
+        const after = normalizeText(getContent(el));
+        if (!before || after !== before) return true;
       }
+      logger?.debug?.("kimi-send-no-change");
+      return false;
     };
     const yuanbaoSend = async (el, options) => {
       const logger = options?.logger;

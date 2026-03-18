@@ -1,0 +1,20 @@
+{
+  "mode": "override",
+  "findInput": [
+    "textarea[placeholder]",
+    "textarea",
+    "div[contenteditable=\"true\"][role=\"textbox\"]",
+    "div[contenteditable=\"true\"]"
+  ],
+  "findSendBtn": [
+    "button[type=\"submit\"]:not([disabled])",
+    "button[aria-label=\"Submit\"]:not([disabled])",
+    "button[aria-label*=\"Submit\"]:not([disabled])",
+    "button[aria-label*=\"Send\"]:not([disabled])",
+    "button[data-testid*=\"send\"]:not([disabled])",
+    "[role=\"button\"][aria-label*=\"Send\"]:not([aria-disabled=\"true\"])",
+    "[role=\"button\"][aria-label*=\"Submit\"]:not([aria-disabled=\"true\"])",
+    "[data-testid*=\"send\"]",
+    "[data-testid*=\"submit\"]"
+  ]
+}

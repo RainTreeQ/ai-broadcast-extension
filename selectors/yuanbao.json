@@ -1,0 +1,17 @@
+{
+  "mode": "override",
+  "findInput": [
+    ".ql-editor[contenteditable=\"true\"]",
+    "div[contenteditable=\"true\"][role=\"textbox\"]",
+    "div[contenteditable=\"true\"]",
+    "textarea"
+  ],
+  "findSendBtn": [
+    "a#yuanbao-send-btn",
+    "a[id*=\"send-btn\"]",
+    "span.icon-send",
+    "[class*=\"send-btn\"]:not([class*=\"disabled\"])",
+    "button[aria-label*=\"发送\"]",
+    "button[aria-label*=\"Send\"]"
+  ]
+}

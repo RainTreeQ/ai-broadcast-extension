@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-18 16:15 | v2.31.0 (MINOR) | Core / Popup UI / Background / Content Script / Manifest/Permissions / Tooling | `.github/workflows/auto-fix-selectors.yml`, `.github/workflows/code-quality.yml`, `.gitignore`, `app/src/lib/extension-storage.js`, `app/src/popup/Popup.jsx`, `background.js`, +46 <!-- auto:476bf0f87b3e -->
 - 2026-03-17 20:49 | v2.30.0 (MINOR) | Core / UI Components / Popup UI / Content Script | `.github/workflows/auto-fix-selectors.yml`, `.github/workflows/code-quality.yml`, `app/components.json`, `app/package-lock.json`, `app/package.json`, `app/src/components/ShapeGrid.jsx`, +17 <!-- auto:00b668edbb9a -->
 - 2026-03-16 22:16 | v2.29.1 (PATCH) | Core | `app/src/components/layout/Hero.jsx` <!-- auto:c4c5d55d3dec -->
 - 2026-03-16 20:13 | v2.29.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js`, `src/content/selectors.js` <!-- auto:0272220a197d -->
@@ -37,7 +38,6 @@
 - 2026-03-16 19:16 | v2.23.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:6e862092c367 -->
 - 2026-03-16 19:07 | v2.22.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:5618504c241c -->
 - 2026-03-16 18:54 | v2.21.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:3ed611681bc6 -->
-- 2026-03-16 18:39 | v2.20.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/core/injection.js` <!-- auto:4b6e9f6695ed -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---

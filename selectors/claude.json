@@ -1,0 +1,13 @@
+{
+  "mode": "override",
+  "findInput": [
+    "div.ProseMirror[contenteditable=\"true\"]",
+    "[data-testid=\"chat-input\"] div[contenteditable]",
+    "fieldset div[contenteditable=\"true\"]",
+    "div[contenteditable=\"true\"]"
+  ],
+  "findSendBtn": [
+    "button[aria-label=\"Send Message\"]",
+    "button[aria-label*=\"Send\"]"
+  ]
+}

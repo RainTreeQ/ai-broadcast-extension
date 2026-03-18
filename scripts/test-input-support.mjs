@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 主流大模型输入框支持情况测试
- * 访问各平台页面，检测 selectors.json 中定义的选择器是否能找到输入框
+ * 访问各平台页面，检测 selectors/ 目录中定义的选择器是否能找到输入框
  * 运行: npm run test:input
  *
  * 输出:
@@ -11,18 +11,23 @@
  */
 
 import { chromium } from 'playwright';
-import { readFileSync, writeFileSync } from 'fs';
+import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
-const SELECTORS_PATH = join(ROOT, 'selectors.json');
+const SELECTORS_DIR = join(ROOT, 'selectors');
 const RESULTS_PATH = join(ROOT, 'test-results.json');
 const AUTH_STATE_PATH = process.env.PLAYWRIGHT_AUTH_STATE_PATH || '';
 
-// Load selectors from selectors.json (single source of truth)
-const SELECTOR_CONFIG = JSON.parse(readFileSync(SELECTORS_PATH, 'utf8'));
+// Load selectors from selectors/ directory (single source of truth)
+const SELECTOR_CONFIG = {};
+for (const file of readdirSync(SELECTORS_DIR)) {
+  if (file === 'index.json' || !file.endsWith('.json')) continue;
+  const platformId = file.replace('.json', '');
+  SELECTOR_CONFIG[platformId] = JSON.parse(readFileSync(join(SELECTORS_DIR, file), 'utf8'));
+}
 
 const PLATFORMS = [
   { id: 'chatgpt',  name: 'ChatGPT',  url: 'https://chatgpt.com/' },

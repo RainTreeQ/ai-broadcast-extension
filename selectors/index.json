@@ -1,0 +1,15 @@
+{
+  "version": 3,
+  "platforms": [
+    "chatgpt",
+    "claude",
+    "gemini",
+    "grok",
+    "deepseek",
+    "doubao",
+    "qianwen",
+    "yuanbao",
+    "kimi",
+    "mistral"
+  ]
+}

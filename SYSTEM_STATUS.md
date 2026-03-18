@@ -70,9 +70,9 @@ This will:
 ```bash
 # Temporarily break a selector
 cd "/Users/quxianglin/Documents/vibe coding/sendol-selectors"
-vim selectors.json
+vim selectors/chatgpt.json
 # Change chatgpt.findInput[0] to "#nonexistent-selector"
-git add selectors.json
+git add selectors/
 git commit -m "test: simulate selector failure"
 git push
 

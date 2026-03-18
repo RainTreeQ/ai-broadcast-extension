@@ -1,0 +1,24 @@
+{
+  "mode": "override",
+  "findInput": [
+    ".ql-editor[contenteditable=\"true\"]",
+    "rich-textarea .ql-editor",
+    "div[contenteditable=\"true\"][role=\"textbox\"]",
+    "p[data-placeholder]"
+  ],
+  "findSendBtn": [
+    "button[aria-label=\"Send message\"]",
+    "button[aria-label=\"Send\"]",
+    "button[aria-label*=\"发送\"]",
+    "button[aria-label*=\"提交\"]",
+    "button[aria-label=\"Submit\"]",
+    "button[aria-label*=\"Submit\"]",
+    "button.send-button",
+    "button[data-test-id=\"send-button\"]",
+    "button[data-testid*=\"send\"]",
+    "button[mattooltip=\"Send message\"]",
+    "button[mattooltip=\"Send\"]",
+    "button[mattooltip*=\"Submit\"]",
+    "button[jsname=\"Qx7uuf\"]"
+  ]
+}

@@ -11,7 +11,7 @@
 
 ### 2. Enhanced E2E Testing
 **File**: `scripts/test-input-support.mjs`
-- Reads from `selectors.json` (single source of truth)
+- Reads from selectors/ (single source of truth)
 - Outputs structured `test-results.json`
 - Distinguishes real failures from "not logged in"
 - Triggers auto-fix on failure
@@ -120,14 +120,14 @@ cat test-results.json
 ### Simulate Failure
 ```bash
 # Break a selector
-vim selectors.json
+vim selectors/chatgpt.json
 # Change chatgpt.findInput[0] to "#nonexistent"
 
 # Run test (should fail and trigger auto-fix)
 npm run test:input
 
 # Restore
-git checkout selectors.json
+git checkout selectors/
 ```
 
 ## 📦 Files Created/Modified
@@ -152,7 +152,7 @@ git checkout selectors.json
 ### Modified Files
 - `scripts/test-input-support.mjs` - Enhanced output
 - `background.js` - Cloud URL updated to your repo
-- `selectors.json` - Extracted from code
+- selectors/ - Extracted from code
 
 ## 🚀 Next Steps
 
@@ -233,7 +233,7 @@ If something doesn't work:
 1. Check `AUTO_FIX_SYSTEM.md` for troubleshooting
 2. Run `npm run diagnose <platform>` locally
 3. Check GitHub Actions logs
-4. Manually update `selectors.json` if needed
+4. Manually update selectors/ if needed
 
 ---
 

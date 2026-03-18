@@ -12,7 +12,7 @@ import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
-const SELECTORS_PATH = join(ROOT, 'selectors.json');
+const SELECTORS_DIR = join(ROOT, 'selectors');
 
 const args = process.argv.slice(2);
 const platform = args[0];
@@ -23,16 +23,17 @@ if (!platform) {
   process.exit(1);
 }
 
-const selectors = JSON.parse(fs.readFileSync(SELECTORS_PATH, 'utf8'));
-
-if (!selectors[platform]) {
-  console.error(`❌ Platform '${platform}' not found in selectors.json`);
+const platformFile = join(SELECTORS_DIR, `${platform}.json`);
+if (!fs.existsSync(platformFile)) {
+  console.error(`❌ Platform '${platform}' not found in selectors/ directory`);
   console.log('\nAvailable platforms:');
-  Object.keys(selectors).forEach(p => console.log(`  - ${p}`));
+  fs.readdirSync(SELECTORS_DIR)
+    .filter(f => f.endsWith('.json') && f !== 'index.json')
+    .forEach(f => console.log(`  - ${f.replace('.json', '')}`));
   process.exit(1);
 }
 
-const config = selectors[platform];
+const config = JSON.parse(fs.readFileSync(platformFile, 'utf8'));
 
 console.log(`\n🔍 Diagnostic Report for: ${platform}\n`);
 console.log('═'.repeat(60));
@@ -83,5 +84,5 @@ console.log('═'.repeat(60));
 console.log('- If a selector returns null, it needs updating');
 console.log('- Selectors are tried in order (first match wins)');
 console.log('- Right-click element → Copy → Copy selector');
-console.log('- Update selectors.json and run: npm run validate:selectors');
+console.log('- Update selectors/{platform}.json and run: npm run validate:selectors');
 console.log('- Push to cloud repo for instant user updates\n');

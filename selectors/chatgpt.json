@@ -1,0 +1,14 @@
+{
+  "mode": "override",
+  "findInput": [
+    "#prompt-textarea",
+    "div[contenteditable=\"true\"][data-lexical-editor]",
+    "div[contenteditable=\"true\"][role=\"textbox\"]"
+  ],
+  "findSendBtn": [
+    "[data-testid=\"send-button\"]",
+    "button[aria-label=\"Send prompt\"]",
+    "button[aria-label=\"Send message\"]",
+    "button[aria-label*=\"Send\"]"
+  ]
+}

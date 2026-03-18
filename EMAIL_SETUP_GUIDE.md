@@ -115,9 +115,9 @@ NOTIFY_EMAIL      Updated now by you
 ```bash
 # 临时破坏一个选择器
 cd "/Users/quxianglin/Documents/vibe coding/sendol-selectors"
-vim selectors.json
+vim selectors/chatgpt.json
 # 修改 chatgpt.findInput[0] 为 "#nonexistent"
-git add selectors.json
+git add selectors/
 git commit -m "test: simulate failure"
 git push
 

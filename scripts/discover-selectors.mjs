@@ -8,13 +8,13 @@
  */
 
 import { chromium } from 'playwright';
-import { existsSync, readFileSync, writeFileSync, appendFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, appendFileSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
-const SELECTORS_PATH = join(ROOT, 'selectors.json');
+const SELECTORS_DIR = join(ROOT, 'selectors');
 
 const PLATFORMS = {
   chatgpt: { url: 'https://chatgpt.com/', name: 'ChatGPT' },
@@ -374,20 +374,26 @@ async function discoverSelectors(platformId, options = {}) {
 }
 
 /**
- * Update selectors.json with discovered selectors
+ * Update selectors/{platform}.json with discovered selectors
  */
 function updateSelectorsFile(platformId, discovered) {
-  const selectors = JSON.parse(readFileSync(SELECTORS_PATH, 'utf8'));
-  
-  const oldSelectors = selectors[platformId];
-  selectors[platformId] = {
+  const platformPath = join(SELECTORS_DIR, `${platformId}.json`);
+  let oldSelectors = {};
+
+  if (existsSync(platformPath)) {
+    oldSelectors = JSON.parse(readFileSync(platformPath, 'utf8'));
+  }
+
+  const nextSelectors = {
+    mode: oldSelectors.mode || 'override',
     findInput: discovered.findInput,
     findSendBtn: discovered.findSendBtn,
   };
-  
-  writeFileSync(SELECTORS_PATH, JSON.stringify(selectors, null, 2) + '\n');
-  
-  return { old: oldSelectors, new: selectors[platformId] };
+
+  mkdirSync(SELECTORS_DIR, { recursive: true });
+  writeFileSync(platformPath, JSON.stringify(nextSelectors, null, 2) + '\n');
+
+  return { old: oldSelectors, new: nextSelectors, path: platformPath };
 }
 
 /**
@@ -421,6 +427,7 @@ async function main() {
     console.log(`  Input selectors: ${discovered.findInput.length}`);
     console.log(`  Button selectors: ${discovered.findSendBtn.length}`);
     console.log(`  Previous input selectors: ${(updated.old?.findInput || []).length}`);
+    console.log(`  Updated file: ${updated.path}`);
     
     if (discovered.confidence < 70) {
       console.warn('\n⚠️  Low confidence score. Manual review recommended.');

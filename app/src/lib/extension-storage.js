@@ -22,6 +22,7 @@ const DRAFT_LOCAL_STORAGE_KEY = 'popupDraftLocal';
 const DEFAULT_POPUP_SETTINGS = {
   autoSend: false,
   newChat: false,
+  selectedPlatforms: [],
 };
 
 const SCHEMA_KEYS = [
@@ -73,6 +74,20 @@ function coalesceBool(...values) {
   return undefined;
 }
 
+function normalizeSelectedPlatforms(value) {
+  if (!Array.isArray(value)) return [];
+
+  const unique = new Set();
+  for (const item of value) {
+    if (typeof item !== 'string') continue;
+    const next = item.trim();
+    if (!next) continue;
+    unique.add(next);
+  }
+
+  return [...unique];
+}
+
 function resolvePopupSettings(record = {}) {
   const structured = isObject(record[STRUCTURED_KEYS.popupSettings])
     ? record[STRUCTURED_KEYS.popupSettings]
@@ -89,13 +104,19 @@ function resolvePopupSettings(record = {}) {
       readBool(record[LEGACY_KEYS.newChat]),
       DEFAULT_POPUP_SETTINGS.newChat
     ),
+    selectedPlatforms: normalizeSelectedPlatforms(structured.selectedPlatforms),
   };
 }
 
 function popupSettingsEqual(a, b) {
+  const aSelectedPlatforms = normalizeSelectedPlatforms(a?.selectedPlatforms);
+  const bSelectedPlatforms = normalizeSelectedPlatforms(b?.selectedPlatforms);
+
   return (
     Boolean(a?.autoSend) === Boolean(b?.autoSend) &&
-    Boolean(a?.newChat) === Boolean(b?.newChat)
+    Boolean(a?.newChat) === Boolean(b?.newChat) &&
+    aSelectedPlatforms.length === bSelectedPlatforms.length &&
+    aSelectedPlatforms.every((value, index) => value === bSelectedPlatforms[index])
   );
 }
 
@@ -111,6 +132,9 @@ function buildPopupSettingsPatch(current, patch = {}) {
   return {
     autoSend: typeof patch.autoSend === 'boolean' ? patch.autoSend : Boolean(current.autoSend),
     newChat: typeof patch.newChat === 'boolean' ? patch.newChat : Boolean(current.newChat),
+    selectedPlatforms: Array.isArray(patch.selectedPlatforms)
+      ? normalizeSelectedPlatforms(patch.selectedPlatforms)
+      : normalizeSelectedPlatforms(current.selectedPlatforms),
   };
 }
 

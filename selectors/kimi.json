@@ -1,0 +1,18 @@
+{
+  "mode": "override",
+  "findInput": [
+    "div.chat-input-editor[contenteditable=\"true\"]",
+    "div[class*=\"chat-input-editor\"][contenteditable=\"true\"]",
+    "textarea[placeholder]",
+    "div[contenteditable=\"true\"][role=\"textbox\"]",
+    "div[contenteditable=\"true\"]",
+    "textarea"
+  ],
+  "findSendBtn": [
+    "div.send-button-container:not(.disabled)",
+    "div[class*=\"send-button-container\"]:not(.disabled)",
+    "button[type=\"submit\"]",
+    "button[aria-label*=\"发送\"]",
+    "button[aria-label*=\"Send\"]"
+  ]
+}

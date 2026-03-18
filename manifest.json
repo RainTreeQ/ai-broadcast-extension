@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "default_locale": "en",
   "name": "__MSG_extName__",
-  "version": "2.30.0",
+  "version": "2.31.0",
   "description": "__MSG_extDescription__",
   "permissions": [
     "activeTab",
@@ -47,17 +47,107 @@
     {
       "matches": [
         "https://chatgpt.com/*",
-        "https://chat.openai.com/*",
-        "https://claude.ai/*",
-        "https://gemini.google.com/*",
-        "https://chat.mistral.ai/*",
-        "https://grok.com/*",
-        "https://*.deepseek.com/*",
-        "https://*.doubao.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": [
+        "shared/platform-registry.js",
+        "content-core.js",
+        "content-chatgpt.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://claude.ai/*"
+      ],
+      "js": [
+        "shared/platform-registry.js",
+        "content-core.js",
+        "content-claude.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://gemini.google.com/*"
+      ],
+      "js": [
+        "shared/platform-registry.js",
+        "content-core.js",
+        "content-gemini.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://grok.com/*"
+      ],
+      "js": [
+        "shared/platform-registry.js",
+        "content-core.js",
+        "content-grok.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.deepseek.com/*"
+      ],
+      "js": [
+        "shared/platform-registry.js",
+        "content-core.js",
+        "content-deepseek.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://chat.mistral.ai/*"
+      ],
+      "js": [
+        "shared/platform-registry.js",
+        "content-core.js",
+        "content-mistral.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.doubao.com/*"
+      ],
+      "js": [
+        "shared/platform-registry.js",
+        "content-core.js",
+        "content-doubao.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
         "https://tongyi.aliyun.com/*",
         "https://www.qianwen.com/*",
-        "https://qianwen.com/*",
-        "https://yuanbao.tencent.com/*",
+        "https://qianwen.com/*"
+      ],
+      "js": [
+        "shared/platform-registry.js",
+        "content-core.js",
+        "content-qianwen.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://yuanbao.tencent.com/*"
+      ],
+      "js": [
+        "shared/platform-registry.js",
+        "content-core.js",
+        "content-yuanbao.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
         "https://*.moonshot.cn/*",
         "https://kimi.ai/*",
         "https://kimi.com/*",
@@ -65,7 +155,8 @@
       ],
       "js": [
         "shared/platform-registry.js",
-        "content.js"
+        "content-core.js",
+        "content-kimi.js"
       ],
       "run_at": "document_idle"
     }

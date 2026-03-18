@@ -1,6 +1,6 @@
 # Selector 变更日志模板
 
-用于记录每次远程 `selectors.json` 发布，建议在 `sendol-selectors` 仓库按版本或日期维护。
+用于记录每次远程 selectors/ 发布，建议在 `sendol-selectors` 仓库按版本或日期维护。
 
 ## 模板
 

@@ -28,18 +28,18 @@ src/content/
 
 ### 2. **Cloud-Managed Selectors** ✅ (GAME CHANGER)
 **Before**: Hardcoded DOM selectors → Extension update required → 3-7 day store review  
-**After**: Cloud-hosted `selectors.json` → Auto-update every 12 hours → Zero downtime
+**After**: Cloud-hosted selectors/ → Auto-update every 12 hours → Zero downtime
 
 **How it works**:
 ```javascript
 // background.js fetches every 12 hours
-fetch('https://raw.githubusercontent.com/YOUR_REPO/selectors.json')
+fetch('https://raw.githubusercontent.com/YOUR_REPO/selectors/{platform}.json')
   → chrome.storage.local.set()
   → content.js reads from cache
 ```
 
 **When ChatGPT breaks**:
-1. Update `selectors.json` on GitHub (2 minutes)
+1. Update selectors/ on GitHub (2 minutes)
 2. Users auto-fix within 12 hours
 3. No extension store submission needed
 
@@ -94,7 +94,7 @@ on_failure: Send email alert
 
 Platform: ChatGPT
 Issue: Input field selector not found
-Action: Update selectors.json
+Action: Update selectors/
 
 Logs: github.com/your-repo/actions/runs/123456
 ```
@@ -167,7 +167,7 @@ $ npm run diagnose claude
 1. GitHub Actions emails you
 2. Open ChatGPT, press F12
 3. Copy new selector
-4. Update `selectors.json`
+4. Update selectors/
 5. Push to GitHub
 6. Users auto-fix in 12 hours
 
@@ -183,7 +183,7 @@ npm run init:selectors-repo
 # Follow printed instructions to push to GitHub
 
 # Update background.js line 2:
-const CLOUD_SELECTORS_URL = "https://raw.githubusercontent.com/YOUR_USERNAME/sendol-selectors/main/selectors.json";
+const CLOUD_SELECTORS_URL = "https://raw.githubusercontent.com/YOUR_USERNAME/sendol-selectors/main/selectors/{platform}.json";
 ```
 
 ### 2. Configure Email Alerts (2 minutes)
@@ -243,7 +243,7 @@ npm run package:extension
 
 ## 💡 Pro Tips
 
-1. **Keep selectors.json in a separate repo** for faster updates
+1. **Keep selectors/ in a separate repo** for faster updates
 2. **Test selectors in DevTools** before committing
 3. **Monitor GitHub Actions** for daily test results
 4. **Use `npm run diagnose <platform>`** when debugging

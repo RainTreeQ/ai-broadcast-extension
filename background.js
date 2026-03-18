@@ -1,13 +1,34 @@
-// Dynamic selectors fetching logic
-const CLOUD_SELECTORS_URL = "https://raw.githubusercontent.com/RainTreeQ/sendol-selectors/main/selectors.json";
+const SELECTORS_BASE_URL = "https://raw.githubusercontent.com/RainTreeQ/sendol-selectors/main/selectors/";
 const CACHE_KEY = "aib_dynamic_selectors";
 const CACHE_TTL = 12 * 60 * 60 * 1000;
+const SELECTOR_PLATFORMS = [
+  'chatgpt', 'claude', 'gemini', 'grok', 'deepseek',
+  'mistral', 'doubao', 'qianwen', 'yuanbao', 'kimi'
+];
 async function updateDynamicSelectors() {
   try {
-    const res = await fetch(CLOUD_SELECTORS_URL);
-    if (!res.ok) throw new Error("fetch failed");
-    const data = await res.json();
-    await chrome.storage.local.set({ [CACHE_KEY]: { data, timestamp: Date.now() } });
+    const existing = await chrome.storage.local.get(CACHE_KEY);
+    const cached = existing?.[CACHE_KEY] || {};
+    const data = cached.data && typeof cached.data === 'object' ? { ...cached.data } : {};
+    const results = await Promise.allSettled(
+      SELECTOR_PLATFORMS.map(async (platform) => {
+        const res = await fetch(`${SELECTORS_BASE_URL}${platform}.json`);
+        if (!res.ok) throw new Error(`fetch ${platform} failed: ${res.status}`);
+        return { platform, selectors: await res.json() };
+      })
+    );
+    let updated = false;
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        const { platform, selectors } = result.value;
+        data[platform] = selectors;
+        updated = true;
+      }
+    }
+    if (updated) {
+      data._meta = { timestamp: Date.now(), version: 3 };
+      await chrome.storage.local.set({ [CACHE_KEY]: { data, timestamp: Date.now() } });
+    }
   } catch (err) {
     console.debug("[AIB] Failed to fetch dynamic selectors:", err);
   }
@@ -709,10 +730,18 @@ async function pingContent(tabId, requestId, debug) {
   }
 }
 
+function getContentScriptFiles(tabUrl) {
+  const platform = getPlatformMetaFromUrl(tabUrl);
+  if (!platform) return ['shared/platform-registry.js', 'content-core.js'];
+  const platformId = (AIB_SHARED?.PLATFORM_DEFINITIONS || FALLBACK_PLATFORM_DEFINITIONS)
+    .find(p => p.name === platform.name)?.id
+    || platform.name.toLowerCase();
+  return ['shared/platform-registry.js', 'content-core.js', `content-${platformId}.js`];
+}
+
 async function ensureContentReady(tabId, requestId, debug, logger) {
   let tabActive = false;
   let tabInfo = null;
-  // Wait for page load to settle before probing/injecting content script.
   try {
     tabInfo = await chrome.tabs.get(tabId);
     const blockedReason = getTabInjectionBlockReason(tabInfo);
@@ -739,10 +768,11 @@ async function ensureContentReady(tabId, requestId, debug, logger) {
     return;
   }
 
+  const scriptFiles = getContentScriptFiles(tabInfo?.url);
   try {
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['shared/platform-registry.js', 'content.js']
+      files: scriptFiles
     });
   } catch (err) {
     logger.debug('execute-script-warning', { tabId, error: err.message });
@@ -753,7 +783,6 @@ async function ensureContentReady(tabId, requestId, debug, logger) {
     return;
   }
 
-  // Retry with aggressive backoffs for active tabs to reduce user-visible latency.
   const backoffs = tabActive ? [60, 120, 220, 420, 800] : [120, 240, 480, 960, 1600];
   const reinjectThreshold = tabActive ? 220 : 480;
   logger.debug('content-retry-plan', { tabId, tabActive, backoffs });
@@ -763,7 +792,7 @@ async function ensureContentReady(tabId, requestId, debug, logger) {
       try {
         await chrome.scripting.executeScript({
           target: { tabId },
-          files: ['shared/platform-registry.js', 'content.js']
+          files: scriptFiles
         });
       } catch (err) {
         logger.debug('execute-script-retry-warning', { tabId, delay, error: err?.message });

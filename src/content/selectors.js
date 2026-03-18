@@ -147,10 +147,14 @@ export const defaultSelectors = {
       'textarea'
     ],
     findSendBtn: [
-      'div.send-button-container:not(.disabled) button',
+      // Kimi 2026: 发送按钮是 div.send-button-container，内部没有 button
       'div.send-button-container:not(.disabled)',
-      'div[class*="send-button-container"]:not(.disabled) button',
+      '.send-button-container',
       'div[class*="send-button-container"]:not(.disabled)',
+      // 向下兼容：旧版可能有内部 button
+      'div.send-button-container:not(.disabled) button',
+      'div[class*="send-button-container"]:not(.disabled) button',
+      // Fallback
       'button[class*="send"]:not([disabled])',
       'button[type="submit"]:not([disabled])',
       'button[aria-label*="发送"]',
@@ -271,7 +275,8 @@ export async function findSendBtnForPlatform(platformId) {
   checkNavigation();
   const cacheKey = `${platformId}:send`;
   const cached = getCached(cacheKey);
-  if (cached && !cached.disabled && cached.getAttribute('aria-disabled') !== 'true') {
+  // 检查缓存：元素必须仍在 DOM 中且未被禁用
+  if (cached && cached.isConnected && !cached.disabled && cached.getAttribute('aria-disabled') !== 'true') {
     return cached;
   }
 

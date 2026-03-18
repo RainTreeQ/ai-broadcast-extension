@@ -158,9 +158,9 @@ jobs:
         run: |
           REPO_URL="https://x-access-token:${SELECTORS_REPO_PAT}@github.com/RainTreeQ/sendol-selectors.git"
           git clone "$REPO_URL" selectors-repo
-          cp selectors.json selectors-repo/selectors.json
+          cp -r selectors/ selectors-repo/selectors/
 
-          if git -C selectors-repo diff --quiet selectors.json; then
+          if git -C selectors-repo diff --quiet -- selectors; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "No changes detected"
             exit 0
@@ -171,8 +171,8 @@ jobs:
 
           BRANCH="auto-fix-$(date +%Y%m%d-%H%M%S)"
           git -C selectors-repo checkout -b "$BRANCH"
-          git -C selectors-repo add selectors.json
-          git -C selectors-repo commit -m "fix: auto-discovered selectors for ${{ inputs.failed_platforms }}"
+          git -C selectors-repo add selectors/
+          git -C selectors-repo commit -m "chore(selectors): sync per-platform selector updates for ${{ inputs.failed_platforms }}"
           git -C selectors-repo push origin "$BRANCH"
 
           echo "has_changes=true" >> $GITHUB_OUTPUT
@@ -204,6 +204,9 @@ jobs:
             ### Affected Platforms
             ${process.env.PLATFORMS.split(',').map((p) => `- ${p.trim()}`).join('\n')}
 
+            ### Per-Platform Selectors Update
+            Updated selector files under \`selectors/{platform}.json\` and synced \`selectors/index.json\` in the selectors repository.
+
             ### Discovery Report
             ${report}
 
@@ -213,7 +216,7 @@ jobs:
             const pr = await github.rest.pulls.create({
               owner: 'RainTreeQ',
               repo: 'sendol-selectors',
-              title: `Auto-fix: Update selectors for ${process.env.PLATFORMS}`,
+              title: `Auto-fix: Update per-platform selectors for ${process.env.PLATFORMS}`,
               head: process.env.BRANCH,
               base: 'main',
               body,

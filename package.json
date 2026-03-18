@@ -1,6 +1,6 @@
 {
   "name": "ai-broadcast-extension",
-  "version": "2.30.0",
+  "version": "2.31.0",
   "license": "AGPL-3.0-or-later",
   "private": true,
   "scripts": {
@@ -22,6 +22,7 @@
     "test:popup": "node scripts/test-popup-ui.mjs",
     "auth:export": "node scripts/export-auth-state.mjs",
     "validate:selectors": "node scripts/validate-selectors.mjs",
+    "guard:popup-style-isolation": "node scripts/check-popup-style-isolation.mjs",
     "diagnose": "node scripts/diagnose.mjs",
     "init:selectors-repo": "bash scripts/init-selectors-repo.sh"
   },

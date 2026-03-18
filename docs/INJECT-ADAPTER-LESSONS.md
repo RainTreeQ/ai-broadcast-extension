@@ -115,7 +115,7 @@ el.dispatchEvent(new Event('change', { bubbles: true }));
 | 改 `setReactValue` | 影响 ChatGPT、Grok、千问、Kimi 的 textarea 分支 |
 | 改 `clearElement` | 影响所有走 runStrategies 的平台 |
 | 改平台 adapter 的 inject/send | 仅影响该平台，安全 |
-| 改 selectors.json | 仅影响 findInput/findSendBtn，不影响注入逻辑 |
+| 改 selectors/ | 仅影响 findInput/findSendBtn，不影响注入逻辑 |
 
 ---
 

@@ -53,6 +53,11 @@ const PRIMARY_PLATFORMS = ['ChatGPT', 'Gemini', 'Claude']
 const PRIMARY_PLATFORM_SET = new Set(PRIMARY_PLATFORMS)
 const PRIMARY_PLATFORM_PRIORITY = new Map(PRIMARY_PLATFORMS.map((name, index) => [name, index]))
 
+function getTabSelectionKey(tab) {
+  const platformName = String(tab?.platformName || '').trim()
+  return platformName || null
+}
+
 function getPlatformPriority(name) {
   return PRIMARY_PLATFORM_PRIORITY.has(name) ? PRIMARY_PLATFORM_PRIORITY.get(name) : 999
 }
@@ -106,6 +111,7 @@ export default function Popup() {
   const [messageText, setMessageText] = useState('')
   const [autoSend, setAutoSend] = useState(false)
   const [newChat, setNewChat] = useState(false)
+  const [popupSettingsReady, setPopupSettingsReady] = useState(false)
   const [statuses, setStatuses] = useState([])
   const [tabsLoading, setTabsLoading] = useState(true)
   const [sending, setSending] = useState(false)
@@ -120,6 +126,8 @@ export default function Popup() {
   const draftSaveTimerRef = useRef(null)
   const latestMessageRef = useRef('')
   const latestProgressRef = useRef({ total: 0, completed: 0, ok: 0, fail: 0 })
+  const savedSelectedPlatformsRef = useRef(null)
+  const selectionHydratedRef = useRef(false)
 
   const selectedSet = new Set(selectedTabIds)
   const hasSelection = selectedTabIds.length > 0
@@ -179,6 +187,9 @@ export default function Popup() {
         if (cancelled) return
         setAutoSend(Boolean(popupSettings.autoSend))
         setNewChat(Boolean(popupSettings.newChat))
+        savedSelectedPlatformsRef.current = Array.isArray(popupSettings.selectedPlatforms)
+          ? popupSettings.selectedPlatforms
+          : []
 
         if (!hasLocalDraft && storageDraft.length > 0) {
           latestMessageRef.current = storageDraft
@@ -192,6 +203,9 @@ export default function Popup() {
         }
       } finally {
         draftHydratedRef.current = true
+        if (!cancelled) {
+          setPopupSettingsReady(true)
+        }
       }
     })()
 
@@ -275,14 +289,40 @@ export default function Popup() {
         .sort(sortTabsByPriority)
       setAiTabs(tabs)
       setSelectedTabIds((prev) => {
-        if (tabs.length > 0 && prev.length === 0) {
-          const primaryIds = tabs
-            .filter((tab) => PRIMARY_PLATFORM_SET.has(tab.platformName))
-            .map((tab) => tab.id)
-          return primaryIds.length > 0 ? primaryIds : tabs.map((t) => t.id)
+        if (!popupSettingsReady) {
+          const currentTabIdSet = new Set(tabs.map((tab) => tab.id))
+          return prev.filter((id) => currentTabIdSet.has(id))
         }
-        const tabIdSet = new Set(tabs.map((t) => t.id))
-        return prev.filter((id) => tabIdSet.has(id))
+
+        const currentTabIdSet = new Set(tabs.map((tab) => tab.id))
+
+        if (!selectionHydratedRef.current) {
+          selectionHydratedRef.current = true
+
+          const savedSelectedPlatforms = Array.isArray(savedSelectedPlatformsRef.current)
+            ? savedSelectedPlatformsRef.current
+            : []
+          const savedSelectedPlatformSet = new Set(savedSelectedPlatforms)
+          const restoredIds = tabs
+            .filter((tab) => {
+              const selectionKey = getTabSelectionKey(tab)
+              return selectionKey ? savedSelectedPlatformSet.has(selectionKey) : false
+            })
+            .map((tab) => tab.id)
+
+          if (restoredIds.length > 0) {
+            return restoredIds
+          }
+
+          return tabs.map((tab) => tab.id)
+        }
+
+        const nextSelectedIds = prev.filter((id) => currentTabIdSet.has(id))
+        if (nextSelectedIds.length > 0 || tabs.length === 0) {
+          return nextSelectedIds
+        }
+
+        return tabs.map((tab) => tab.id)
       })
     } catch (error) {
       if (handleContextLoss(error)) return
@@ -291,12 +331,23 @@ export default function Popup() {
     } finally {
       setTabsLoading(false)
     }
-  }, [handleContextLoss])
+  }, [handleContextLoss, popupSettingsReady])
 
   useEffect(() => {
     if (typeof chrome === 'undefined' || !chrome.runtime?.sendMessage) return
     loadTabs()
   }, [loadTabs])
+
+  useEffect(() => {
+    if (!popupSettingsReady || !selectionHydratedRef.current) return
+
+    const selectedPlatforms = aiTabs
+      .filter((tab) => selectedTabIds.includes(tab.id))
+      .map((tab) => getTabSelectionKey(tab))
+      .filter(Boolean)
+
+    void setPopupSettingsPatch({ selectedPlatforms })
+  }, [aiTabs, popupSettingsReady, selectedTabIds])
 
   const handleRefresh = useCallback(() => {
     setRefreshSpinning(true)

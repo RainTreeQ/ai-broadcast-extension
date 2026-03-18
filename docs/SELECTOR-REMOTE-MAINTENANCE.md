@@ -1,6 +1,6 @@
 # Selector 远程维护手册
 
-本手册用于维护 `sendol-selectors` 远程仓库中的 `selectors.json`，目标是：
+本手册用于维护 sendol-selectors 远程仓库中的 selectors/，目标是：
 
 - 不发扩展新版本，快速修复平台 DOM 变动。
 - 通过远程配置统一控制各平台输入框与发送按钮定位。
@@ -12,7 +12,7 @@
 
 ## 1) 当前架构
 
-- 远程源：`sendol-selectors` 仓库 `selectors.json`
+- 远程源：`sendol-selectors` 仓库 selectors/
 - 拉取方：扩展 `background.js` 定时拉取并缓存到 `chrome.storage.local.aib_dynamic_selectors`
 - 使用方：`src/content/selectors.js`
   - `getDynamicSelectors()`
@@ -20,7 +20,7 @@
   - `findSendBtnForPlatform(platformId)`
 - 兜底：`src/content/heuristics.js`（当 selector 不命中时）
 
-## 2) selectors.json v2 规范
+## 2) selectors/ v2 规范
 
 顶层字段：
 
@@ -68,7 +68,7 @@
 
 ## 4) 发布流程（远程仓库）
 
-1. 在 `sendol-selectors` 更新 `selectors.json`。
+1. 在 `sendol-selectors` 更新 selectors/。
 2. 本地 JSON 校验通过（格式合法、逗号/转义正确）。
 3. 提交并 push 到默认分支。
 4. 等待扩展拉取周期生效（安装时 + 定时拉取）。
@@ -82,7 +82,7 @@
 
 出现误匹配或大面积失败时：
 
-1. 立即回滚到上一版 `selectors.json`。
+1. 立即回滚到上一版 selectors/。
 2. 对异常平台临时设置 `mode: "disabled"`，让其走 heuristic。
 3. 补充新 selector 后再切回 `override`。
 
@@ -101,7 +101,7 @@
 
 ### Q3: 新平台接入最小步骤？
 
-1. 在 `selectors.json` 增加平台节点（`mode/findInput/findSendBtn`）。
+1. 在 selectors/ 增加平台节点（`mode/findInput/findSendBtn`）。
 2. 在扩展 `platform-registry` 与 `platformAdapters` 增加平台映射与基础 adapter。
 3. 回归验证输入与发送两条链路。
 

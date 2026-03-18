@@ -19,14 +19,14 @@ When a platform breaks (e.g., ChatGPT changes their input field):
 document.querySelector('YOUR_NEW_SELECTOR')
 ```
 
-### 2. Update selectors.json
+### 2. Update selectors/
 ```bash
-# Edit selectors.json
-vim selectors.json
+# Edit selectors/
+vim selectors/chatgpt.json
 
 # Or if using separate repo:
 cd ../sendol-selectors
-vim selectors.json
+vim selectors/chatgpt.json
 ```
 
 ### 3. Validate & Deploy
@@ -35,7 +35,7 @@ vim selectors.json
 npm run validate:selectors
 
 # Commit and push (if using separate repo)
-git add selectors.json
+git add selectors/
 git commit -m "fix: update ChatGPT input selector"
 git push
 
@@ -45,7 +45,7 @@ git push
 ## 🏗️ Architecture
 
 ### Dynamic Selectors System
-- **Location**: `selectors.json` (can be hosted separately on GitHub)
+- **Location**: selectors/ (can be hosted separately on GitHub)
 - **Update Frequency**: Every 12 hours via `background.js`
 - **Fallback**: Heuristic engine if selectors fail
 
@@ -57,7 +57,7 @@ src/content/
   └── heuristics.js     # Fallback detection engine
 
 background.js           # Fetches selectors from cloud
-selectors.json          # Platform DOM selectors (cloud-hosted)
+selectors/          # Platform DOM selectors (cloud-hosted)
 ```
 
 ### Build Process
@@ -110,7 +110,7 @@ npm run test:input
 
 2. **Add selectors**:
 ```json
-// selectors.json
+// selectors/{platform}.json
 {
   "newplatform": {
     "findInput": ["textarea#input", "div[contenteditable='true']"],
@@ -166,17 +166,17 @@ Current stats:
 2. **Use specific selectors first**, generic ones last (order matters)
 3. **Validate JSON** with `npm run validate:selectors` before pushing
 4. **Monitor GitHub Actions** for daily test results
-5. **Keep selectors.json in a separate repo** for faster updates
+5. **Keep selectors/ in a separate repo** for faster updates
 
 ## 🆘 Emergency Procedures
 
 ### All Platforms Broken
-1. Check if `selectors.json` fetch is failing (network issue)
+1. Check if selectors/ fetch is failing (network issue)
 2. Verify GitHub raw URL is accessible
 3. Heuristic engine should still work as fallback
 
 ### Specific Platform Broken
-1. Update `selectors.json` immediately
+1. Update selectors/ immediately
 2. Users get fix within 12 hours
 3. No extension store review needed
 

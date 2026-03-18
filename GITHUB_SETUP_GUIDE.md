@@ -40,7 +40,7 @@ Sendol AI 广播扩展的动态 DOM 选择器配置
 由于你的主项目使用 **AGPL-3.0-or-later**，selectors 仓库建议：
 
 **选项 1：不设置许可证（推荐）**
-- selectors.json 只是配置文件，不是代码
+- selectors/ 只是配置文件，不是代码
 - 不勾选 license 选项即可
 
 **选项 2：使用相同许可证**
@@ -89,13 +89,13 @@ https://github.com/YOUR_USERNAME/sendol-selectors
 ```
 应该能看到：
 - README.md
-- selectors.json
+- selectors/
 - .gitignore
 
 ### Step 5: 测试 Raw URL
 访问：
 ```
-https://raw.githubusercontent.com/YOUR_USERNAME/sendol-selectors/main/selectors.json
+https://raw.githubusercontent.com/YOUR_USERNAME/sendol-selectors/main/selectors/{platform}.json
 ```
 应该能看到 JSON 内容
 

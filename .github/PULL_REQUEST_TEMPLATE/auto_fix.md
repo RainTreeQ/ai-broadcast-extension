@@ -4,7 +4,7 @@
 <!-- List of platforms with broken selectors -->
 
 ### 🔍 Changes
-<!-- Diff of selectors.json changes -->
+<!-- Diff of selectors/{platform}.json changes -->
 
 ### ✅ Confidence Level
 <!-- High / Medium / Low -->

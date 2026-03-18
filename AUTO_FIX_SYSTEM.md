@@ -48,7 +48,9 @@ Users auto-update within 12 hours
 **File**: `scripts/test-input-support.mjs`
 
 **Enhancements**:
-- Reads from `selectors.json` (single source of truth)
+- Reads from `selectors/` directory (per-platform JSON files)
+  - Each platform has its own file at `selectors/{platform}.json` with format `{ "mode": "override", "findInput": [...], "findSendBtn": [...] }`
+  - There is also `selectors/index.json` with `{ "version": 3, "platforms": [...] }`
 - Outputs `test-results.json` for GitHub Actions
 - Distinguishes between "not logged in" (expected) vs "selector broken" (failure)
 - Exits with code 1 only for real failures
@@ -64,7 +66,7 @@ Users auto-update within 12 hours
 - **Trigger**: Manual or from E2E monitor
 - **Actions**:
   1. Run selector discovery for each failed platform
-  2. Update `selectors.json`
+  2. Update `selectors/{platform}.json`
   3. Create PR in `sendol-selectors` repo
   4. Add labels based on confidence
 
@@ -120,7 +122,7 @@ Users auto-update within 12 hours
 08:05 - You receive email
 08:15 - You review PR, selectors look wrong
 08:16 - Close PR
-08:20 - Manually update selectors.json
+08:20 - Manually update selectors/{platform}.json
 08:22 - Push to selectors repo
 20:00 - Users' extensions auto-update
 ```
@@ -133,7 +135,7 @@ Users auto-update within 12 hours
 08:03 - Issue created in main repo
 08:05 - You receive email
 09:00 - You manually inspect Qianwen
-09:05 - Update selectors.json
+09:05 - Update selectors/{platform}.json
 09:07 - Push to selectors repo
 21:00 - Users' extensions auto-update
 ```
@@ -173,15 +175,15 @@ cat test-results.json
 
 ### Simulate Failure
 ```bash
-# Temporarily break a selector in selectors.json
-vim selectors.json
+# Temporarily break a selector in selectors/{platform}.json
+vim selectors/chatgpt.json (example)
 # Change chatgpt.findInput[0] to "#nonexistent"
 
 # Run test (should fail)
 npm run test:input
 
 # Restore
-git checkout selectors.json
+git checkout selectors/
 ```
 
 ### Test Auto-Fix Workflow (Manual Trigger)
@@ -220,7 +222,7 @@ None required (uses `GITHUB_TOKEN` automatically)
 
 ### Check User Update Status
 Users update every 12 hours via `background.js`:
-- Fetches from: `https://raw.githubusercontent.com/RainTreeQ/sendol-selectors/main/selectors.json`
+- Fetches from: `https://raw.githubusercontent.com/RainTreeQ/sendol-selectors/main/selectors/{platform}.json`
 - Cached in: `chrome.storage.local.aib_dynamic_selectors`
 - Next update: Check `timestamp` field
 
@@ -261,7 +263,7 @@ If the auto-fix system fails:
 1. Check GitHub Actions logs
 2. Review `test-results.json`
 3. Run `npm run diagnose <platform>` locally
-4. Manually update `selectors.json` in selectors repo
+4. Manually update `selectors/{platform}.json` in selectors repo
 5. Users will get the fix within 12 hours
 
 ---

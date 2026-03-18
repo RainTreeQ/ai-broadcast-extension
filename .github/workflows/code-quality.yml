@@ -6,6 +6,20 @@ on:
     branches: [master, main]
 
 jobs:
+  popup-style-guard:
+    name: Popup Style Guard
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check popup style isolation
+        run: npm run guard:popup-style-isolation
+
   lint:
     name: ESLint
     runs-on: ubuntu-latest

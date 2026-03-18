@@ -40,3 +40,15 @@ update_*.js
 # Dev tool artifacts
 *.tgz
 ohmyinspect/
+
+# Agent/AI tool configs (per-user, not project)
+.agent/
+.agents/
+.claude/
+.trae/
+.sisyphus/
+opencode.json
+skills-lock.json
+
+# QA screenshots
+qa-attempt-*.png

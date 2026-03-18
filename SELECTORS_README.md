@@ -4,7 +4,7 @@ This repository hosts the dynamic DOM selectors configuration for the Sendol AI 
 
 ## What is this?
 
-The `selectors.json` file contains CSS selectors for finding input fields and send buttons across different AI platforms (ChatGPT, Claude, Gemini, etc.). The browser extension automatically fetches this file every 12 hours to stay up-to-date with platform UI changes.
+The selectors/ directory contains CSS selectors for finding input fields and send buttons across different AI platforms (ChatGPT, Claude, Gemini, etc.). The browser extension automatically fetches this file every 12 hours to stay up-to-date with platform UI changes.
 
 ## Why does this exist?
 
@@ -32,7 +32,7 @@ AI platforms frequently update their UI, which can break browser extensions. By 
 ## How to update
 
 1. When a platform breaks, test the new selectors in browser DevTools
-2. Update `selectors.json` in this repository
+2. Update selectors/ in this repository
 3. Commit and push - users will auto-update within 12 hours
 
 ## Supported Platforms
