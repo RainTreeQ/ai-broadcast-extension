@@ -668,8 +668,8 @@ export function Hero() {
               </CardContent>
             </Card>
 
-            <Card variant="raised" className="relative overflow-hidden rounded-2xl border-foreground/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-foreground/5 to-transparent mix-blend-overlay" />
+            <Card variant="raised" className="relative overflow-hidden rounded-2xl border-foreground/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-foreground/5 to-transparent mix-blend-overlay opacity-50 transition-opacity duration-300 group-hover:opacity-100" />
               <CardHeader className="relative z-10">
                 <CardTitle className="flex items-center gap-2 text-lg"><Crown className="h-4 w-4" /> {copy.proTitle}</CardTitle>
                 <CardDescription>{copy.proDesc}</CardDescription>

@@ -43,38 +43,38 @@ export function FAQ() {
     <main id="main-content" className="container mx-auto px-4 py-16 max-w-3xl min-h-[calc(100vh-8rem)]">
       <h1 className="text-4xl font-bold mb-8 text-center">{copy.title}</h1>
       
-      <Accordion type="single" collapsible className="w-full space-y-4">
-        <AccordionItem value="item-1" className="bg-card px-6 rounded-xl border">
-          <AccordionTrigger className="text-left text-lg font-medium">{copy.q1}</AccordionTrigger>
-          <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+      <Accordion type="single" collapsible className="w-full space-y-4 pb-12">
+        <AccordionItem value="item-1" className="bg-card px-6 rounded-[20px] border border-border/60 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05),0_1px_3px_-1px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_8px_-2px_rgba(255,255,255,0.02),0_1px_3px_-1px_rgba(255,255,255,0.01)] transition-all duration-300 hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_4px_8px_-2px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_16px_-4px_rgba(255,255,255,0.04),0_4px_8px_-2px_rgba(255,255,255,0.02)] hover:-translate-y-0.5 overflow-hidden">
+          <AccordionTrigger className="text-left text-[17px] font-medium hover:no-underline transition-colors py-5 [&[data-state=open]]:text-foreground text-foreground/80">{copy.q1}</AccordionTrigger>
+          <AccordionContent className="text-muted-foreground text-[15px] leading-relaxed pb-6">
             {copy.a1}
           </AccordionContent>
         </AccordionItem>
         
-        <AccordionItem value="item-2" className="bg-card px-6 rounded-xl border">
-          <AccordionTrigger className="text-left text-lg font-medium">{copy.q2}</AccordionTrigger>
-          <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+        <AccordionItem value="item-2" className="bg-card px-6 rounded-[20px] border border-border/60 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05),0_1px_3px_-1px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_8px_-2px_rgba(255,255,255,0.02),0_1px_3px_-1px_rgba(255,255,255,0.01)] transition-all duration-300 hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_4px_8px_-2px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_16px_-4px_rgba(255,255,255,0.04),0_4px_8px_-2px_rgba(255,255,255,0.02)] hover:-translate-y-0.5 overflow-hidden">
+          <AccordionTrigger className="text-left text-[17px] font-medium hover:no-underline transition-colors py-5 [&[data-state=open]]:text-foreground text-foreground/80">{copy.q2}</AccordionTrigger>
+          <AccordionContent className="text-muted-foreground text-[15px] leading-relaxed pb-6">
             {copy.a2}
           </AccordionContent>
         </AccordionItem>
         
-        <AccordionItem value="item-3" className="bg-card px-6 rounded-xl border">
-          <AccordionTrigger className="text-left text-lg font-medium">{copy.q3}</AccordionTrigger>
-          <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+        <AccordionItem value="item-3" className="bg-card px-6 rounded-[20px] border border-border/60 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05),0_1px_3px_-1px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_8px_-2px_rgba(255,255,255,0.02),0_1px_3px_-1px_rgba(255,255,255,0.01)] transition-all duration-300 hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_4px_8px_-2px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_16px_-4px_rgba(255,255,255,0.04),0_4px_8px_-2px_rgba(255,255,255,0.02)] hover:-translate-y-0.5 overflow-hidden">
+          <AccordionTrigger className="text-left text-[17px] font-medium hover:no-underline transition-colors py-5 [&[data-state=open]]:text-foreground text-foreground/80">{copy.q3}</AccordionTrigger>
+          <AccordionContent className="text-muted-foreground text-[15px] leading-relaxed pb-6">
             {copy.a3}
           </AccordionContent>
         </AccordionItem>
         
-        <AccordionItem value="item-4" className="bg-card px-6 rounded-xl border">
-          <AccordionTrigger className="text-left text-lg font-medium">{copy.q4}</AccordionTrigger>
-          <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+        <AccordionItem value="item-4" className="bg-card px-6 rounded-[20px] border border-border/60 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05),0_1px_3px_-1px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_8px_-2px_rgba(255,255,255,0.02),0_1px_3px_-1px_rgba(255,255,255,0.01)] transition-all duration-300 hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_4px_8px_-2px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_16px_-4px_rgba(255,255,255,0.04),0_4px_8px_-2px_rgba(255,255,255,0.02)] hover:-translate-y-0.5 overflow-hidden">
+          <AccordionTrigger className="text-left text-[17px] font-medium hover:no-underline transition-colors py-5 [&[data-state=open]]:text-foreground text-foreground/80">{copy.q4}</AccordionTrigger>
+          <AccordionContent className="text-muted-foreground text-[15px] leading-relaxed pb-6">
             {copy.a4}
           </AccordionContent>
         </AccordionItem>
         
-        <AccordionItem value="item-5" className="bg-card px-6 rounded-xl border">
-          <AccordionTrigger className="text-left text-lg font-medium">{copy.q5}</AccordionTrigger>
-          <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+        <AccordionItem value="item-5" className="bg-card px-6 rounded-[20px] border border-border/60 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05),0_1px_3px_-1px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_8px_-2px_rgba(255,255,255,0.02),0_1px_3px_-1px_rgba(255,255,255,0.01)] transition-all duration-300 hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_4px_8px_-2px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_16px_-4px_rgba(255,255,255,0.04),0_4px_8px_-2px_rgba(255,255,255,0.02)] hover:-translate-y-0.5 overflow-hidden">
+          <AccordionTrigger className="text-left text-[17px] font-medium hover:no-underline transition-colors py-5 [&[data-state=open]]:text-foreground text-foreground/80">{copy.q5}</AccordionTrigger>
+          <AccordionContent className="text-muted-foreground text-[15px] leading-relaxed pb-6">
             {copy.a5}
           </AccordionContent>
         </AccordionItem>
