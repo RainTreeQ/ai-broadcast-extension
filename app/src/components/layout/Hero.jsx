@@ -624,81 +624,80 @@ export function Hero() {
           </div>
         </div>
 
-        <section id="pro-tip" aria-labelledby="pro-tip-heading" className="mt-20 md:mt-24">
-          <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto bg-card rounded-[24px] p-6 md:p-8 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05),0_1px_3px_-1px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_8px_-2px_rgba(255,255,255,0.02),0_1px_3px_-1px_rgba(255,255,255,0.01)] border border-border/60 transition-all duration-300 hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_4px_8px_-2px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_16px_-4px_rgba(255,255,255,0.04),0_4px_8px_-2px_rgba(255,255,255,0.02)]">
-            <div className="flex flex-col md:flex-row gap-8 items-center">
-              <div className="flex-1 space-y-3">
-                <h3 id="pro-tip-heading" className="font-semibold text-xl flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  {copy.proTipTitle || "如何获得最佳体验？"}
-                </h3>
-                <p className="text-muted-foreground text-base leading-relaxed">
-                  {copy.proTipDesc || "建议结合系统的分屏功能（如 Mac 的左右分屏或 2x2 网格），一边打开多个 AI 标签页，一边使用 Sendol 直观对比不同模型的答案。"}
-                </p>
+        <section id="pro-tip" aria-labelledby="pro-tip-heading" className="mt-24 space-y-6 md:mt-32 md:space-y-8">
+          <div className="flex flex-col items-center text-center gap-3">
+            <h2 id="pro-tip-heading" className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl flex items-center justify-center gap-3">
+              <Sparkles className="h-8 w-8 text-primary" />
+              {copy.proTipTitle || "如何获得最佳体验？"}
+            </h2>
+            <p className="text-sm text-muted-foreground md:text-base max-w-2xl">
+              {copy.proTipDesc || "建议结合系统的分屏功能（如 Mac 的左右分屏或 2x2 网格），一边打开多个 AI 标签页，一边使用 Sendol 直观对比不同模型的答案。"}
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto w-full relative aspect-video rounded-2xl bg-muted overflow-hidden border border-border/40 shadow-[0_30px_60px_-35px_rgba(0,0,0,0.4)] dark:shadow-[0_20px_60px_-25px_rgba(255,255,255,0.06)] ring-1 ring-border/50">
+            {/* Simulated split screen mockup */}
+            <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-[2px] bg-border/40 p-[2px]">
+              <div className="bg-background flex flex-col relative overflow-hidden">
+                <div className="h-8 bg-muted/50 border-b border-border/40 flex items-center px-4">
+                  <div className="flex gap-2"><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/></div>
+                  <span className="text-[11px] font-medium text-muted-foreground mx-auto">ChatGPT</span>
+                </div>
+                <div className="flex-1 p-5 flex flex-col gap-3">
+                  <div className="h-3 w-16 rounded-full bg-primary/20 self-end" />
+                  <div className="h-3 w-full rounded-full bg-muted" />
+                  <div className="h-3 w-3/4 rounded-full bg-muted" />
+                  <div className="h-3 w-5/6 rounded-full bg-muted mt-2" />
+                </div>
               </div>
-              <div className="flex-1 w-full relative aspect-video rounded-xl bg-muted overflow-hidden border border-border/40 shadow-inner">
-                {/* Simulated split screen mockup */}
-                <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-[1px] bg-border/40 p-[1px]">
-                  <div className="bg-background flex flex-col relative overflow-hidden">
-                    <div className="h-6 bg-muted/50 border-b border-border/40 flex items-center px-2">
-                      <div className="flex gap-1.5"><div className="w-2 h-2 rounded-full bg-foreground/10"/><div className="w-2 h-2 rounded-full bg-foreground/10"/><div className="w-2 h-2 rounded-full bg-foreground/10"/></div>
-                      <span className="text-[9px] font-medium text-muted-foreground mx-auto">ChatGPT</span>
-                    </div>
-                    <div className="flex-1 p-3 flex flex-col gap-2">
-                      <div className="h-2 w-12 rounded-full bg-primary/20 self-end" />
-                      <div className="h-2 w-full rounded-full bg-muted" />
-                      <div className="h-2 w-3/4 rounded-full bg-muted" />
-                    </div>
+              <div className="bg-background flex flex-col relative overflow-hidden">
+                <div className="h-8 bg-muted/50 border-b border-border/40 flex items-center px-4">
+                  <div className="flex gap-2"><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/></div>
+                  <span className="text-[11px] font-medium text-muted-foreground mx-auto">Claude</span>
+                </div>
+                <div className="flex-1 p-5 flex flex-col gap-3">
+                  <div className="h-3 w-16 rounded-full bg-primary/20 self-end" />
+                  <div className="h-3 w-5/6 rounded-full bg-muted" />
+                  <div className="h-3 w-1/2 rounded-full bg-muted" />
+                </div>
+              </div>
+              <div className="bg-background flex flex-col relative overflow-hidden">
+                <div className="h-8 bg-muted/50 border-b border-border/40 flex items-center px-4">
+                  <div className="flex gap-2"><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/></div>
+                  <span className="text-[11px] font-medium text-muted-foreground mx-auto">Gemini</span>
+                </div>
+                <div className="flex-1 p-5 flex flex-col gap-3">
+                  <div className="h-3 w-16 rounded-full bg-primary/20 self-end" />
+                  <div className="h-3 w-[90%] rounded-full bg-muted" />
+                  <div className="h-3 w-2/3 rounded-full bg-muted" />
+                  <div className="h-3 w-1/3 rounded-full bg-muted mt-2" />
+                </div>
+              </div>
+              <div className="bg-background flex flex-col relative overflow-hidden">
+                <div className="h-8 bg-muted/50 border-b border-border/40 flex items-center px-4">
+                  <div className="flex gap-2"><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/><div className="w-2.5 h-2.5 rounded-full bg-foreground/10"/></div>
+                  <span className="text-[11px] font-medium text-muted-foreground mx-auto">DeepSeek</span>
+                </div>
+                <div className="flex-1 p-5 flex flex-col gap-3">
+                  <div className="h-3 w-16 rounded-full bg-primary/20 self-end" />
+                  <div className="h-3 w-full rounded-full bg-muted" />
+                  <div className="h-3 w-4/5 rounded-full bg-muted" />
+                </div>
+              </div>
+              {/* Central Sendol Popup overlay */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-60 bg-card/95 backdrop-blur-md rounded-xl border border-border/80 shadow-[0_12px_40px_rgb(0,0,0,0.3)] dark:shadow-[0_12px_40px_rgba(255,255,255,0.1)] flex flex-col overflow-hidden">
+                <div className="h-8 border-b border-border/50 flex items-center justify-between px-4">
+                  <span className="text-[11px] font-semibold tracking-tight">Sendol</span>
+                </div>
+                <div className="flex-1 p-3 flex flex-col gap-3">
+                  <div className="h-[45%] bg-muted/50 rounded-md border border-border/30 p-2">
+                    <div className="h-1.5 w-12 bg-foreground/20 rounded-full mb-2" />
+                    <div className="h-1.5 w-20 bg-foreground/20 rounded-full" />
                   </div>
-                  <div className="bg-background flex flex-col relative overflow-hidden">
-                    <div className="h-6 bg-muted/50 border-b border-border/40 flex items-center px-2">
-                      <div className="flex gap-1.5"><div className="w-2 h-2 rounded-full bg-foreground/10"/><div className="w-2 h-2 rounded-full bg-foreground/10"/><div className="w-2 h-2 rounded-full bg-foreground/10"/></div>
-                      <span className="text-[9px] font-medium text-muted-foreground mx-auto">Claude</span>
-                    </div>
-                    <div className="flex-1 p-3 flex flex-col gap-2">
-                      <div className="h-2 w-12 rounded-full bg-primary/20 self-end" />
-                      <div className="h-2 w-5/6 rounded-full bg-muted" />
-                      <div className="h-2 w-1/2 rounded-full bg-muted" />
-                    </div>
-                  </div>
-                  <div className="bg-background flex flex-col relative overflow-hidden">
-                    <div className="h-6 bg-muted/50 border-b border-border/40 flex items-center px-2">
-                      <div className="flex gap-1.5"><div className="w-2 h-2 rounded-full bg-foreground/10"/><div className="w-2 h-2 rounded-full bg-foreground/10"/><div className="w-2 h-2 rounded-full bg-foreground/10"/></div>
-                      <span className="text-[9px] font-medium text-muted-foreground mx-auto">Gemini</span>
-                    </div>
-                    <div className="flex-1 p-3 flex flex-col gap-2">
-                      <div className="h-2 w-12 rounded-full bg-primary/20 self-end" />
-                      <div className="h-2 w-[90%] rounded-full bg-muted" />
-                      <div className="h-2 w-2/3 rounded-full bg-muted" />
-                    </div>
-                  </div>
-                  <div className="bg-background flex flex-col relative overflow-hidden">
-                    <div className="h-6 bg-muted/50 border-b border-border/40 flex items-center px-2">
-                      <div className="flex gap-1.5"><div className="w-2 h-2 rounded-full bg-foreground/10"/><div className="w-2 h-2 rounded-full bg-foreground/10"/><div className="w-2 h-2 rounded-full bg-foreground/10"/></div>
-                      <span className="text-[9px] font-medium text-muted-foreground mx-auto">DeepSeek</span>
-                    </div>
-                    <div className="flex-1 p-3 flex flex-col gap-2">
-                      <div className="h-2 w-12 rounded-full bg-primary/20 self-end" />
-                      <div className="h-2 w-full rounded-full bg-muted" />
-                      <div className="h-2 w-4/5 rounded-full bg-muted" />
-                    </div>
-                  </div>
-                  {/* Central Sendol Popup overlay */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-40 bg-card/95 backdrop-blur-md rounded-lg border border-border/80 shadow-[0_8px_30px_rgb(0,0,0,0.2)] flex flex-col overflow-hidden">
-                    <div className="h-5 border-b border-border/50 flex items-center justify-between px-2">
-                      <span className="text-[8px] font-semibold tracking-tight">Sendol</span>
-                    </div>
-                    <div className="flex-1 p-2 flex flex-col gap-2">
-                      <div className="h-[40%] bg-muted/50 rounded border border-border/30 p-1">
-                        <div className="h-1 w-8 bg-foreground/20 rounded-full mb-1" />
-                        <div className="h-1 w-12 bg-foreground/20 rounded-full" />
-                      </div>
-                      <div className="flex gap-1 mt-auto">
-                        <div className="flex-1 h-4 bg-muted rounded border border-border/30" />
-                        <div className="w-8 h-4 bg-primary rounded border border-primary/30 flex items-center justify-center">
-                          <div className="w-2 h-2 border-t border-r border-primary-foreground/80 translate-x-[-1px] rotate-45" />
-                        </div>
-                      </div>
+                  <div className="flex gap-2 mt-auto">
+                    <div className="flex-1 h-6 bg-muted rounded-md border border-border/30" />
+                    <div className="w-12 h-6 bg-primary rounded-md border border-primary/30 flex items-center justify-center">
+                      <div className="w-2.5 h-2.5 border-t-2 border-r-2 border-primary-foreground/80 translate-x-[-1px] rotate-45" />
                     </div>
                   </div>
                 </div>

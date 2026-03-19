@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-19 17:03 | v1.2.2 (PATCH) | Core | `app/src/components/layout/Hero.jsx` <!-- auto:fb79a20858cb -->
 - 2026-03-19 16:57 | v1.2.1 (PATCH) | Core | `app/src/components/layout/Hero.jsx` <!-- auto:fd2dd3ab6243 -->
 - 2026-03-19 16:56 | v1.2.0 (MINOR) | Popup UI / Background / Manifest/Permissions / Tooling | `app/src/popup/Popup.jsx`, `background.js`, `manifest.json`, `scripts/build-content.mjs`, `scripts/discover-selectors.mjs`, `scripts/validate-selectors.mjs` <!-- auto:f102f013fcf6 -->
 - 2026-03-19 16:52 | v1.1.1 (PATCH) | Core | `app/src/components/layout/Hero.jsx` <!-- auto:0fa25d290a90 -->
@@ -37,7 +38,6 @@
 - 2026-03-19 16:02 | v2.31.4 (PATCH) | Core | `package-lock.json`, `tests/site/code-quality.spec.js`, `tests/site/i18n.spec.js`, `tests/site/navigation.spec.js`, `tests/site/theme.spec.js` <!-- auto:c357cdd4b41b -->
 - 2026-03-19 16:02 | v2.31.3 (PATCH) | Core | `app/src/components/layout/Footer.jsx`, `app/src/components/layout/Header.jsx` <!-- auto:2c584f6752f9 -->
 - 2026-03-19 16:01 | v2.31.2 (PATCH) | Core | `app/src/App.jsx`, `app/src/pages/Changelog.jsx`, `app/src/pages/Contact.jsx`, `app/src/pages/FAQ.jsx`, `app/src/pages/Install.jsx`, `app/src/pages/Privacy.jsx`, +1 <!-- auto:ea5159ddeb0f -->
-- 2026-03-19 15:56 | v2.31.1 (PATCH) | Core | `app/index.html`, `app/src/App.jsx`, `package.json`, `tests/site/playwright.config.js` <!-- auto:6fea298355d4 -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---
