@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-19 16:01 | v2.31.2 (PATCH) | Core | `app/src/App.jsx`, `app/src/pages/Changelog.jsx`, `app/src/pages/Contact.jsx`, `app/src/pages/FAQ.jsx`, `app/src/pages/Install.jsx`, `app/src/pages/Privacy.jsx`, +1 <!-- auto:ea5159ddeb0f -->
 - 2026-03-19 15:56 | v2.31.1 (PATCH) | Core | `app/index.html`, `app/src/App.jsx`, `package.json`, `tests/site/playwright.config.js` <!-- auto:6fea298355d4 -->
 - 2026-03-18 16:15 | v2.31.0 (MINOR) | Core / Popup UI / Background / Content Script / Manifest/Permissions / Tooling | `.github/workflows/auto-fix-selectors.yml`, `.github/workflows/code-quality.yml`, `.gitignore`, `app/src/lib/extension-storage.js`, `app/src/popup/Popup.jsx`, `background.js`, +46 <!-- auto:476bf0f87b3e -->
 - 2026-03-17 20:49 | v2.30.0 (MINOR) | Core / UI Components / Popup UI / Content Script | `.github/workflows/auto-fix-selectors.yml`, `.github/workflows/code-quality.yml`, `app/components.json`, `app/package-lock.json`, `app/package.json`, `app/src/components/ShapeGrid.jsx`, +17 <!-- auto:00b668edbb9a -->
@@ -37,7 +38,6 @@
 - 2026-03-16 19:42 | v2.25.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:9e45adee36d4 -->
 - 2026-03-16 19:36 | v2.24.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/chatgpt.js`, `src/content/adapters/grok.js` <!-- auto:bf4f0512d549 -->
 - 2026-03-16 19:16 | v2.23.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:6e862092c367 -->
-- 2026-03-16 19:07 | v2.22.0 (MINOR) | Content Script / Core | `content.js`, `src/content/adapters/grok.js` <!-- auto:5618504c241c -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---
