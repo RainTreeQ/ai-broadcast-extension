@@ -608,17 +608,35 @@ export function Hero() {
                 </CardHeader>
               </Card>
             </div>
-            <div className="flex flex-col gap-6 w-full max-w-lg mt-12 bg-card rounded-[24px] p-6 shadow-sm border border-border/60 dark:border-border/30">
-              <div className="space-y-2">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
+          </div>
+
+          <div className="flex justify-center lg:justify-end">
+            <div className="group relative max-w-[380px] overflow-hidden rounded-[24px] shadow-[0_30px_60px_-35px_rgba(0,0,0,0.65)] dark:shadow-[0_20px_60px_-25px_rgba(255,255,255,0.08)] ring-1 ring-border/50 transition-all duration-700 hover:-translate-y-2 hover:shadow-[0_45px_75px_-30px_rgba(0,0,0,0.8)] dark:hover:shadow-[0_30px_70px_-20px_rgba(255,255,255,0.12)] hover:ring-border/80">
+              {/* 微拟物：顶部光泽遮罩，悬浮时稍微加强 */}
+              <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-b from-white/10 to-transparent opacity-40 mix-blend-overlay transition-opacity duration-700 group-hover:opacity-70 dark:from-white/5" />
+              <img
+                src={screenshotSrc}
+                alt={copy.popupScreenshotAlt}
+                className="block h-auto w-full transition-transform duration-700 group-hover:scale-[1.015]"
+                loading="eager"
+              />
+            </div>
+          </div>
+        </div>
+
+        <section id="pro-tip" aria-labelledby="pro-tip-heading" className="mt-20 md:mt-24">
+          <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto bg-card rounded-[24px] p-6 md:p-8 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05),0_1px_3px_-1px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_8px_-2px_rgba(255,255,255,0.02),0_1px_3px_-1px_rgba(255,255,255,0.01)] border border-border/60 transition-all duration-300 hover:shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_4px_8px_-2px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_16px_-4px_rgba(255,255,255,0.04),0_4px_8px_-2px_rgba(255,255,255,0.02)]">
+            <div className="flex flex-col md:flex-row gap-8 items-center">
+              <div className="flex-1 space-y-3">
+                <h3 id="pro-tip-heading" className="font-semibold text-xl flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-primary" />
                   {copy.proTipTitle || "如何获得最佳体验？"}
                 </h3>
-                <p className="text-muted-foreground text-[15px] leading-relaxed">
+                <p className="text-muted-foreground text-base leading-relaxed">
                   {copy.proTipDesc || "建议结合系统的分屏功能（如 Mac 的左右分屏或 2x2 网格），一边打开多个 AI 标签页，一边使用 Sendol 直观对比不同模型的答案。"}
                 </p>
               </div>
-              <div className="relative aspect-video rounded-xl bg-muted overflow-hidden border border-border/40">
+              <div className="flex-1 w-full relative aspect-video rounded-xl bg-muted overflow-hidden border border-border/40 shadow-inner">
                 {/* Simulated split screen mockup */}
                 <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-[1px] bg-border/40 p-[1px]">
                   <div className="bg-background flex flex-col relative overflow-hidden">
@@ -687,20 +705,7 @@ export function Hero() {
               </div>
             </div>
           </div>
-
-          <div className="flex justify-center lg:justify-end">
-            <div className="group relative max-w-[380px] overflow-hidden rounded-[24px] shadow-[0_30px_60px_-35px_rgba(0,0,0,0.65)] dark:shadow-[0_20px_60px_-25px_rgba(255,255,255,0.08)] ring-1 ring-border/50 transition-all duration-700 hover:-translate-y-2 hover:shadow-[0_45px_75px_-30px_rgba(0,0,0,0.8)] dark:hover:shadow-[0_30px_70px_-20px_rgba(255,255,255,0.12)] hover:ring-border/80">
-              {/* 微拟物：顶部光泽遮罩，悬浮时稍微加强 */}
-              <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-b from-white/10 to-transparent opacity-40 mix-blend-overlay transition-opacity duration-700 group-hover:opacity-70 dark:from-white/5" />
-              <img
-                src={screenshotSrc}
-                alt={copy.popupScreenshotAlt}
-                className="block h-auto w-full transition-transform duration-700 group-hover:scale-[1.015]"
-                loading="eager"
-              />
-            </div>
-          </div>
-        </div>
+        </section>
 
         <section id="features" aria-labelledby="features-heading" className="mt-24 space-y-6 md:mt-32 md:space-y-8">
           <div className="flex flex-col items-center text-center gap-3">
