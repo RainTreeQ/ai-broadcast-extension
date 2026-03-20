@@ -488,7 +488,6 @@ function PlatformLogos() {
     { name: "Claude", Icon: Claude },
     { name: "Gemini", Icon: Gemini },
     { name: "DeepSeek", Icon: DeepSeek },
-    { name: "Mistral", Icon: Mistral },
     { name: "Doubao", Icon: Doubao },
     { name: "Yuanbao", Icon: Yuanbao },
     { name: "Kimi", Icon: Kimi },
@@ -588,25 +587,19 @@ export function Hero() {
               </Button>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Card variant="inset" className="rounded-2xl min-w-0">
-                <CardHeader className="space-y-1 p-4">
-                  <CardDescription className="text-[11px] uppercase tracking-[0.12em] wrap-break-word">{copy.statPlatforms}</CardDescription>
-                  <PlatformLogos />
-                </CardHeader>
-              </Card>
-              <Card variant="inset" className="rounded-2xl">
-                <CardHeader className="space-y-1 p-4">
-                  <CardDescription className="text-[11px] uppercase tracking-[0.12em]">{copy.statMode}</CardDescription>
-                  <CardTitle className="text-xl">{copy.statModeValue}</CardTitle>
-                </CardHeader>
-              </Card>
-              <Card variant="inset" className="rounded-2xl">
-                <CardHeader className="space-y-1 p-4">
-                  <CardDescription className="text-[11px] uppercase tracking-[0.12em]">{copy.statDraft}</CardDescription>
-                  <CardTitle className="text-xl">{copy.statDraftValue}</CardTitle>
-                </CardHeader>
-              </Card>
+            <div className="grid gap-6 md:grid-cols-3 sm:grid-cols-3 pt-6 border-t border-border/40">
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{copy.statPlatforms}</div>
+                <PlatformLogos />
+              </div>
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{copy.statMode}</div>
+                <div className="text-[15px] font-medium text-foreground">{copy.statModeValue}</div>
+              </div>
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{copy.statDraft}</div>
+                <div className="text-[15px] font-medium text-foreground">{copy.statDraftValue}</div>
+              </div>
             </div>
           </div>
 
@@ -627,7 +620,6 @@ export function Hero() {
         <section id="pro-tip" aria-labelledby="pro-tip-heading" className="mt-24 space-y-6 md:mt-32 md:space-y-8">
           <div className="flex flex-col items-center text-center gap-3">
             <h2 id="pro-tip-heading" className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl flex items-center justify-center gap-3">
-              <Sparkles className="h-8 w-8 text-primary" />
               {copy.proTipTitle || "如何获得最佳体验？"}
             </h2>
             <p className="text-sm text-muted-foreground md:text-base max-w-2xl">
@@ -706,176 +698,193 @@ export function Hero() {
           </div>
         </section>
 
-        <section id="features" aria-labelledby="features-heading" className="mt-24 space-y-6 md:mt-32 md:space-y-8">
-          <div className="flex flex-col items-center text-center gap-3">
+        <section id="features" aria-labelledby="features-heading" className="mt-32 md:mt-48 space-y-12">
+          <div className="flex flex-col items-center text-center gap-4">
             <h2 id="features-heading" className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{copy.featureTitle}</h2>
-            <p className="text-sm text-muted-foreground md:text-base">{copy.featureDesc}</p>
+            <p className="text-lg text-muted-foreground max-w-2xl">{copy.featureDesc}</p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card variant="default" className="group relative overflow-hidden transition-colors hover:border-foreground/20">
-              <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full bg-foreground/5 blur-2xl transition-all duration-500 group-hover:bg-foreground/10" />
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base"><Wallet className="h-4 w-4" /> {copy.featureOneTitle}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-[15px] text-foreground/80">
-                <p>{copy.featureOneBody}</p>
-              </CardContent>
-            </Card>
-            <Card variant="default" className="group relative overflow-hidden transition-colors hover:border-foreground/20">
-              <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full bg-foreground/5 blur-2xl transition-all duration-500 group-hover:bg-foreground/10" />
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base"><ShieldCheck className="h-4 w-4" /> {copy.featureTwoTitle}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-[15px] text-foreground/80">
-                <p>{copy.featureTwoBody}</p>
-              </CardContent>
-            </Card>
-            <Card variant="default" className="group relative overflow-hidden transition-colors hover:border-foreground/20">
-              <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full bg-foreground/5 blur-2xl transition-all duration-500 group-hover:bg-foreground/10" />
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base"><Sparkles className="h-4 w-4" /> {copy.featureThreeTitle}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-[15px] text-foreground/80">
-                <p>{copy.featureThreeBody}</p>
-              </CardContent>
-            </Card>
+          <div className="grid gap-12 md:grid-cols-3 max-w-6xl mx-auto px-4">
+            <div className="flex flex-col gap-5">
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner ring-1 ring-primary/20">
+                <Wallet className="h-7 w-7" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground tracking-tight">{copy.featureOneTitle}</h3>
+              <p className="text-base leading-relaxed text-muted-foreground">{copy.featureOneBody}</p>
+            </div>
+            
+            <div className="flex flex-col gap-5">
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner ring-1 ring-primary/20">
+                <ShieldCheck className="h-7 w-7" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground tracking-tight">{copy.featureTwoTitle}</h3>
+              <p className="text-base leading-relaxed text-muted-foreground">{copy.featureTwoBody}</p>
+            </div>
+            
+            <div className="flex flex-col gap-5">
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner ring-1 ring-primary/20">
+                <Sparkles className="h-7 w-7" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground tracking-tight">{copy.featureThreeTitle}</h3>
+              <p className="text-base leading-relaxed text-muted-foreground">{copy.featureThreeBody}</p>
+            </div>
           </div>
         </section>
 
-        <section id="pricing" aria-labelledby="pricing-heading" className="mt-24 space-y-6 md:mt-32 md:space-y-8">
-          <div className="flex flex-col items-center text-center gap-3">
+        <section id="pricing" aria-labelledby="pricing-heading" className="mt-32 md:mt-48 space-y-12">
+          <div className="flex flex-col items-center text-center gap-4">
             <h2 id="pricing-heading" className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{copy.pricingTitle}</h2>
-            <p className="text-sm text-muted-foreground md:text-base">
+            <p className="text-lg text-muted-foreground max-w-2xl">
               {copy.pricingDesc}
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card variant="default" className="rounded-2xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg"><Coins className="h-4 w-4" /> {copy.communityTitle}</CardTitle>
-                <CardDescription>{copy.communityDesc}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2 text-[15px] text-foreground/80">
-                <p>{copy.communityBody1}</p>
-                <p>{copy.communityBody2}</p>
-                <Button asChild variant="outline" className="mt-3 w-full">
-                  <a href="https://github.com/RainTreeQ/sendol-extension" target="_blank" rel="noreferrer">{copy.communityBtn}</a>
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto px-4">
+            <div className="flex flex-col h-full bg-card rounded-[24px] border border-border/40 shadow-sm p-8 transition-transform hover:-translate-y-1 hover:shadow-md">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center text-foreground shadow-inner">
+                  <Coins className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{copy.communityTitle}</h3>
+                  <p className="text-sm text-muted-foreground mt-0.5">{copy.communityDesc}</p>
+                </div>
+              </div>
+              <div className="flex-1 space-y-3 my-6">
+                <p className="text-[15px] leading-relaxed text-foreground/80">{copy.communityBody1}</p>
+                <p className="text-[15px] leading-relaxed text-foreground/80">{copy.communityBody2}</p>
+              </div>
+              <Button asChild variant="outline" className="w-full mt-auto rounded-xl">
+                <a href="https://github.com/RainTreeQ/sendol-extension" target="_blank" rel="noreferrer">{copy.communityBtn}</a>
+              </Button>
+            </div>
 
-            <Card variant="raised" className="relative overflow-hidden rounded-2xl border-foreground/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
-              <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-foreground/5 to-transparent mix-blend-overlay opacity-50 transition-opacity duration-300 group-hover:opacity-100" />
-              <CardHeader className="relative z-10">
-                <CardTitle className="flex items-center gap-2 text-lg"><Crown className="h-4 w-4" /> {copy.proTitle}</CardTitle>
-                <CardDescription>{copy.proDesc}</CardDescription>
-              </CardHeader>
-              <CardContent className="relative z-10 space-y-2 text-[15px] text-foreground/80">
-                <p>{copy.proBody1}</p>
-                <p>{copy.proBody2}</p>
-                <Button asChild className="mt-3 w-full">
-                  <a href="https://github.com/RainTreeQ/sendol-extension/issues" target="_blank" rel="noreferrer">{copy.proBtn}</a>
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col h-full bg-card rounded-[24px] border border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(255,255,255,0.03)] p-8 relative overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.1)] dark:hover:shadow-[0_12px_40px_rgba(255,255,255,0.05)] ring-1 ring-primary/10">
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-primary/5 to-transparent mix-blend-overlay" />
+              <div className="absolute top-0 right-8 px-3 py-1 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider rounded-b-lg shadow-sm">
+                Coming Soon
+              </div>
+              <div className="flex items-center gap-3 mb-4 relative z-10">
+                <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-inner">
+                  <Crown className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{copy.proTitle}</h3>
+                  <p className="text-sm text-primary/80 mt-0.5">{copy.proDesc}</p>
+                </div>
+              </div>
+              <div className="flex-1 space-y-3 my-6 relative z-10">
+                <p className="text-[15px] leading-relaxed text-foreground/90 font-medium">{copy.proBody1}</p>
+                <p className="text-[15px] leading-relaxed text-foreground/80">{copy.proBody2}</p>
+              </div>
+              <Button asChild className="w-full mt-auto rounded-xl shadow-md hover:shadow-lg relative z-10">
+                <a href="https://github.com/RainTreeQ/sendol-extension/issues" target="_blank" rel="noreferrer">{copy.proBtn}</a>
+              </Button>
+            </div>
 
-            <Card variant="default" className="rounded-2xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg"><HandHeart className="h-4 w-4" /> {copy.sponsorTitle}</CardTitle>
-                <CardDescription>{copy.sponsorDesc}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2 text-[15px] text-foreground/80">
-                <p>{copy.sponsorBody1}</p>
-                <p>{copy.sponsorBody2}</p>
-                <Button asChild variant="secondary" className="mt-3 w-full">
-                  <a href="https://github.com/sponsors" target="_blank" rel="noreferrer">{copy.sponsorBtn}</a>
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col h-full bg-card rounded-[24px] border border-border/40 shadow-sm p-8 transition-transform hover:-translate-y-1 hover:shadow-md">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center text-foreground shadow-inner">
+                  <HandHeart className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{copy.sponsorTitle}</h3>
+                  <p className="text-sm text-muted-foreground mt-0.5">{copy.sponsorDesc}</p>
+                </div>
+              </div>
+              <div className="flex-1 space-y-3 my-6">
+                <p className="text-[15px] leading-relaxed text-foreground/80">{copy.sponsorBody1}</p>
+                <p className="text-[15px] leading-relaxed text-foreground/80">{copy.sponsorBody2}</p>
+              </div>
+              <Button asChild variant="secondary" className="w-full mt-auto rounded-xl bg-secondary/80 hover:bg-secondary">
+                <a href="https://github.com/sponsors" target="_blank" rel="noreferrer">{copy.sponsorBtn}</a>
+              </Button>
+            </div>
           </div>
         </section>
 
-        <section id="support" aria-labelledby="support-heading" className="mt-24 space-y-6 md:mt-32 md:space-y-8">
-          <div className="flex flex-col items-center text-center gap-3">
+        <section id="support" aria-labelledby="support-heading" className="mt-32 md:mt-48 space-y-12">
+          <div className="flex flex-col items-center text-center gap-4">
             <h2 id="support-heading" className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{copy.ctaSupport}</h2>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card variant="inset" className="rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-lg">{copy.supportTitle}</CardTitle>
-                <CardDescription>{copy.supportDesc}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2 text-[15px] text-foreground/80">
-                <p>{copy.supportBody1}</p>
-                <p>{copy.supportBody2}</p>
-              </CardContent>
-            </Card>
-            <Card variant="inset" className="rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-lg">{copy.supportCtaTitle}</CardTitle>
-                <CardDescription>{copy.supportCtaDesc}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-[15px] text-foreground/80">
-                <p>{copy.supportCtaBody1}</p>
-                <p>{copy.supportCtaBody2}</p>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <Button asChild size="sm">
-                    <a href="https://github.com/RainTreeQ/sendol-extension#-installation--安装" target="_blank" rel="noreferrer">
-                      {copy.ctaInstall}
-                      <ArrowUpRight className="h-4 w-4" />
-                    </a>
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={(e) => handleScrollTo(e, "pricing")}>
-                    {copy.ctaPricing}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="grid gap-12 md:grid-cols-2 max-w-5xl mx-auto px-4">
+            <div className="flex flex-col gap-4">
+              <h3 className="text-xl font-semibold tracking-tight">{copy.supportTitle}</h3>
+              <p className="text-muted-foreground text-base leading-relaxed">{copy.supportDesc}</p>
+              <div className="space-y-2 mt-2">
+                <p className="text-foreground/80 leading-relaxed text-[15px] pl-4 border-l-2 border-primary/20">{copy.supportBody1}</p>
+                <p className="text-foreground/80 leading-relaxed text-[15px] pl-4 border-l-2 border-primary/20">{copy.supportBody2}</p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-4">
+              <h3 className="text-xl font-semibold tracking-tight">{copy.supportCtaTitle}</h3>
+              <p className="text-muted-foreground text-base leading-relaxed">{copy.supportCtaDesc}</p>
+              <div className="space-y-2 mt-2">
+                <p className="text-foreground/80 leading-relaxed text-[15px] pl-4 border-l-2 border-primary/20">{copy.supportCtaBody1}</p>
+                <p className="text-foreground/80 leading-relaxed text-[15px] pl-4 border-l-2 border-primary/20">{copy.supportCtaBody2}</p>
+              </div>
+              <div className="flex flex-wrap gap-3 pt-4">
+                <Button asChild size="default">
+                  <a href="https://github.com/RainTreeQ/sendol-extension#-installation--安装" target="_blank" rel="noreferrer">
+                    {copy.ctaInstall}
+                    <ArrowUpRight className="h-4 w-4 ml-1" />
+                  </a>
+                </Button>
+                <Button variant="outline" size="default" onClick={(e) => handleScrollTo(e, "pricing")}>
+                  {copy.ctaPricing}
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section id="language" aria-labelledby="language-heading" className="mt-24 space-y-6 md:mt-32 md:space-y-8">
-          <div className="flex flex-col items-center text-center gap-3">
+        <section id="language" aria-labelledby="language-heading" className="mt-32 md:mt-48 space-y-12 mb-10">
+          <div className="flex flex-col items-center text-center gap-4">
             <h2 id="language-heading" className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{copy.languageTitle}</h2>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card variant="inset" className="rounded-2xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg"><Languages className="h-4 w-4" /> {copy.languageTitle}</CardTitle>
-                <CardDescription>{copy.languageDesc}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2 text-[15px] text-foreground/80">
-                <p>{copy.languagePractice1}</p>
-                <p>{copy.languagePractice2}</p>
-                <p>{copy.languagePractice3}</p>
-                <p className="flex items-center gap-2">
-                  <SunMoon className="h-4 w-4" />
-                  {copy.languagePractice4}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card variant="inset" className="rounded-2xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg"><Globe className="h-4 w-4" /> {copy.roadmapTitle}</CardTitle>
-                <CardDescription>{copy.roadmapDesc}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {plannedLocales.map((item) => (
-                    <Badge key={item.code} variant="outline" className="px-3 py-1 text-[11px]">
-                      {item.label}
-                    </Badge>
-                  ))}
+          <div className="grid gap-12 md:grid-cols-2 max-w-5xl mx-auto px-4">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                  <Languages className="h-5 w-5" />
                 </div>
-                <p className="flex items-center gap-2 text-[15px] text-foreground/80">
-                  <MoonStar className="h-4 w-4" />
-                  system/light/dark
-                </p>
-              </CardContent>
-            </Card>
+                <h3 className="text-xl font-semibold tracking-tight">{copy.languageTitle}</h3>
+              </div>
+              <p className="text-muted-foreground text-base leading-relaxed">{copy.languageDesc}</p>
+              <ul className="space-y-3 mt-2 text-[15px] text-foreground/80">
+                <li className="flex items-start gap-2 before:content-[''] before:mt-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-primary/40">{copy.languagePractice1}</li>
+                <li className="flex items-start gap-2 before:content-[''] before:mt-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-primary/40">{copy.languagePractice2}</li>
+                <li className="flex items-start gap-2 before:content-[''] before:mt-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-primary/40">{copy.languagePractice3}</li>
+                <li className="flex items-start gap-2 before:content-[''] before:mt-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-primary/40">
+                  <span className="flex items-center gap-2">
+                    <SunMoon className="h-4 w-4 text-primary" />
+                    {copy.languagePractice4}
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                  <Globe className="h-5 w-5" />
+                </div>
+                <h3 className="text-xl font-semibold tracking-tight">{copy.roadmapTitle}</h3>
+              </div>
+              <p className="text-muted-foreground text-base leading-relaxed">{copy.roadmapDesc}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {plannedLocales.map((item) => (
+                  <Badge key={item.code} variant="secondary" className="px-3 py-1.5 text-xs bg-muted hover:bg-muted/80">
+                    {item.label}
+                  </Badge>
+                ))}
+              </div>
+              <p className="flex items-center gap-2 text-[15px] text-foreground/80 mt-4">
+                <MoonStar className="h-4 w-4 text-primary" />
+                system / light / dark
+              </p>
+            </div>
           </div>
         </section>
       </div>
