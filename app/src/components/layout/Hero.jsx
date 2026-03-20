@@ -64,7 +64,7 @@ const COPY = {
     supportCtaBody1: "建议先用社区版体验流畅工作流，如有进阶需求再考虑升级。",
     supportCtaBody2: "随时欢迎通过反馈或赞助来支持我们的持续迭代。",
     proTipTitle: "如何获得最佳体验？",
-    proTipDesc: "建议结合系统的分屏功能（如 Mac 的左侧分屏 / 右侧分屏或 Windows 的网格对齐），在桌面展开多个不同 AI 模型的独立窗口。在使用 Sendol 分发问题后，可以直接在这个 2x2 或 1x3 的并排视图里对比回答质量，挑选最匹配的答案。",
+    proTipDesc: "建议结合系统或浏览器的分屏功能，展开多个不同 AI 模型的独立窗口。在使用 Sendol 分发问题后，可以直接在并排视图里对比回答质量，挑选最匹配的答案。",
   },
   en: {
     heroBadge: "Chrome / Edge Extension",
@@ -123,7 +123,7 @@ const COPY = {
     supportCtaBody1: "Try the free Community version first to see how it transforms your workflow.",
     supportCtaBody2: "Feel free to support our ongoing development via feedback or sponsorship.",
     proTipTitle: "How to get the best experience?",
-    proTipDesc: "We recommend using your system's split-screen features (like Mac's Split View or Windows' Snap Assist) to arrange multiple AI tabs side-by-side in a 2x2 or 1x3 grid. After broadcasting with Sendol, you can instantly compare responses in real-time.",
+    proTipDesc: "We recommend using your system or browser's split-screen features to arrange multiple AI models in independent windows. After broadcasting with Sendol, you can instantly compare the response quality side-by-side to pick the best answer.",
   },
   "zh-TW": {
     heroBadge: "Chrome / Edge 瀏覽器擴展",
@@ -182,7 +182,7 @@ const COPY = {
     supportCtaBody1: "建議先用社區版體驗流暢工作流，如有進階需求再考慮升級。",
     supportCtaBody2: "隨時歡迎通過反饋或贊助來支持我們的持續迭代。",
     proTipTitle: "如何獲得最佳體驗？",
-    proTipDesc: "建議結合系統的分屏功能（如 Mac 的左側分屏 / 右側分屏或 Windows 的網格對齊），在桌面展開多個不同 AI 模型的獨立窗口。在使用 Sendol 分發問題後，可以直接在這個 2x2 或 1x3 的並排視圖裡對比回答質量，挑選最匹配的答案。",
+    proTipDesc: "建議結合系統或瀏覽器的分屏功能，展開多個不同 AI 模型的獨立窗口。在使用 Sendol 分發問題後，可以直接在並排視圖裡對比回答質量，挑選最匹配的答案。",
   },
   "ja": {
     heroBadge: "Chrome / Edge 拡張機能",
@@ -241,7 +241,7 @@ const COPY = {
     supportCtaBody1: "まずは無料のコミュニティ版でスムーズなワークフローを体験してください。",
     supportCtaBody2: "フィードバックやスポンサー支援での応援をお待ちしております。",
     proTipTitle: "最高の体験を得るために",
-    proTipDesc: "OSの画面分割機能（MacのSplit ViewやWindowsのスナップ機能など）を利用して、2x2や1x3のグリッドで異なるAIモデルを並べることをお勧めします。Sendolで質問を一斉送信した直後に、回答をリアルタイムで比較できます。",
+    proTipDesc: "OSやブラウザの画面分割機能を利用して、複数の異なるAIモデルを独立したウィンドウで開くことをお勧めします。Sendolで質問を一斉送信した直後に、並べて表示された回答の質を比較し、最適な答えを選ぶことができます。",
   },
   "ko": {
     heroBadge: "Chrome / Edge 확장 프로그램",
@@ -300,7 +300,7 @@ const COPY = {
     supportCtaBody1: "먼저 무료 커뮤니티 버전으로 원활한 워크플로우를 경험해 보세요.",
     supportCtaBody2: "피드백이나 후원을 통해 지속적인 개발을 언제든 응원해 주세요.",
     proTipTitle: "최상의 경험을 얻는 방법",
-    proTipDesc: "Mac의 화면 분할이나 Windows의 스냅 기능 등을 사용하여 2x2 또는 1x3 그리드에 여러 AI 모델 창을 나란히 배치하는 것을 권장합니다. Sendol로 한 번에 전송한 후, 각 답변을 실시간으로 비교해 보세요.",
+    proTipDesc: "시스템이나 브라우저의 화면 분할 기능을 사용하여 여러 AI 모델을 독립된 창으로 여는 것을 권장합니다. Sendol로 질문을 전송한 후, 나란히 배치된 화면에서 답변의 질을 비교하고 가장 적합한 답변을 선택할 수 있습니다.",
   },
   "es": {
     heroBadge: "Extensión para Chrome / Edge",
@@ -359,7 +359,7 @@ const COPY = {
     supportCtaBody1: "Prueba primero la versión Community para ver cómo transforma tu flujo de trabajo.",
     supportCtaBody2: "Siéntete libre de apoyar nuestro desarrollo a través de comentarios o patrocinios.",
     proTipTitle: "¿Cómo obtener la mejor experiencia?",
-    proTipDesc: "Recomendamos utilizar las funciones de pantalla dividida de tu sistema (como Split View de Mac o Snap Assist de Windows) para organizar múltiples pestañas de IA una al lado de la otra en una cuadrícula de 2x2 o 1x3. Después de enviar con Sendol, puedes comparar las respuestas al instante.",
+    proTipDesc: "Recomendamos utilizar las funciones de pantalla dividida de tu sistema o navegador para organizar múltiples modelos de IA en ventanas independientes. Después de enviar con Sendol, puedes comparar instantáneamente la calidad de las respuestas en paralelo para elegir la mejor.",
   },
   "de": {
     heroBadge: "Chrome / Edge Erweiterung",
@@ -418,7 +418,7 @@ const COPY = {
     supportCtaBody1: "Probieren Sie zuerst die Community-Version aus, um Ihren Workflow zu verbessern.",
     supportCtaBody2: "Unterstützen Sie unsere Entwicklung gerne durch Feedback oder Sponsoring.",
     proTipTitle: "Wie erhalten Sie das beste Erlebnis?",
-    proTipDesc: "Wir empfehlen, die Split-Screen-Funktionen Ihres Betriebssystems (wie Mac Split View oder Windows Snap Assist) zu nutzen, um mehrere KI-Tabs nebeneinander in einem 2x2- oder 1x3-Raster anzuordnen. Nach dem Senden mit Sendol können Sie die Antworten in Echtzeit vergleichen.",
+    proTipDesc: "Wir empfehlen, die Split-Screen-Funktionen Ihres Betriebssystems oder Browsers zu nutzen, um verschiedene KI-Modelle in unabhängigen Fenstern anzuordnen. Nach dem Senden mit Sendol können Sie die Antwortqualität direkt nebeneinander vergleichen und die beste auswählen.",
   },
   "fr": {
     heroBadge: "Extension Chrome / Edge",
@@ -477,7 +477,7 @@ const COPY = {
     supportCtaBody1: "Essayez d'abord la version Community pour voir comment elle transforme votre flux de travail.",
     supportCtaBody2: "N'hésitez pas à soutenir notre développement via des retours ou un parrainage.",
     proTipTitle: "Comment obtenir la meilleure expérience ?",
-    proTipDesc: "Nous vous recommandons d'utiliser les fonctions d'écran partagé de votre système (comme Split View sur Mac ou Snap Assist sur Windows) pour disposer plusieurs onglets d'IA côte à côte dans une grille 2x2 ou 1x3. Après avoir envoyé avec Sendol, vous pouvez comparer les réponses en temps réel.",
+    proTipDesc: "Nous vous recommandons d'utiliser les fonctions d'écran partagé de votre système ou de votre navigateur pour organiser plusieurs modèles d'IA dans des fenêtres indépendantes. Après avoir envoyé avec Sendol, vous pouvez comparer instantanément la qualité des réponses côte à côte pour choisir la meilleure.",
   },
 };
 
