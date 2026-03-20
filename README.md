@@ -26,6 +26,7 @@
 ## 🔄 Recent Updates / 自动更新
 
 <!-- AUTO_README_UPDATES_START -->
+- 2026-03-20 13:33 | v1.2.8 (PATCH) | Core | `app/src/components/layout/Hero.jsx` <!-- auto:696f7b7f9722 -->
 - 2026-03-20 13:24 | v1.2.7 (PATCH) | Core | `tests/site/navigation.spec.js`, `tests/site/playwright.config.js`, `tests/site/theme.spec.js` <!-- auto:a0a58406d9b2 -->
 - 2026-03-20 13:09 | v1.2.6 (PATCH) | Core | `app/src/pages/FAQ.jsx` <!-- auto:95ad3bad6ee9 -->
 - 2026-03-20 13:05 | v1.2.5 (PATCH) | Core | `app/src/components/landing/HeroShapeGrid.jsx` <!-- auto:5598ddf96fe1 -->
@@ -37,7 +38,6 @@
 - 2026-03-19 16:52 | v1.1.1 (PATCH) | Core | `app/src/components/layout/Hero.jsx` <!-- auto:0fa25d290a90 -->
 - 2026-03-19 16:48 | v1.1.0 (MINOR) | Core | `app/src/components/ShapeGrid.jsx`, `app/src/components/landing/HeroShapeGrid.jsx`, `playwright-report/index.html`, `test-results/.last-run.json` <!-- auto:85bf8b1857a9 -->
 - 2026-03-19 16:41 | v2.33.0 (MINOR) | Core / Popup UI | `app/src/lib/i18n.js`, `app/src/popup/Popup.jsx` <!-- auto:9458254312f3 -->
-- 2026-03-19 16:36 | v2.32.1 (PATCH) | Core | `app/src/pages/FAQ.jsx` <!-- auto:eb1a2af22172 -->
 <!-- AUTO_README_UPDATES_END -->
 
 ---

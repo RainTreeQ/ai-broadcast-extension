@@ -547,14 +547,15 @@ export function Hero() {
 
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="absolute inset-x-0 top-0 z-0 h-[520px]">
+      <div className="absolute inset-x-0 top-0 z-0 h-[800px]">
         <HeroShapeGrid />
         <div className="absolute -left-36 top-4 h-72 w-72 rounded-full bg-foreground/8 blur-3xl" />
         <div className="absolute -right-32 top-20 h-72 w-72 rounded-full bg-foreground/6 blur-3xl" />
+        <div className="absolute left-1/2 top-[400px] -translate-x-1/2 h-[400px] w-[800px] rounded-full bg-primary/5 blur-[100px]" />
       </div>
 
       <div className="container relative z-10 mx-auto px-4 pb-20 pt-12 md:px-6 md:pt-16">
-        <div className="flex flex-col items-center justify-center pt-24 pb-16 md:pt-40 md:pb-32 text-center max-w-4xl mx-auto z-10 space-y-8 relative">
+        <div className="flex flex-col items-center justify-center pt-24 pb-16 md:pt-32 md:pb-24 text-center max-w-4xl mx-auto z-10 space-y-8 relative">
           {/* Logo Title - fully centered */}
           <div className="flex items-center gap-3">
             <span className="font-bold text-3xl tracking-tight text-foreground/90">
@@ -589,22 +590,22 @@ export function Hero() {
         </div>
 
         {/* Plugin UI showcase - completely unboxed, floating feeling */}
-        <div className="relative mx-auto max-w-5xl z-10 -mt-8 md:-mt-16 mb-24 perspective-1000">
-          <div className="relative rounded-2xl overflow-hidden border border-foreground/10 bg-background/40 backdrop-blur-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_-15px_rgba(255,255,255,0.05)] ring-1 ring-white/10 dark:ring-white/5 transition-transform duration-700 ease-out hover:scale-[1.02] hover:shadow-[0_30px_70px_-20px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_30px_70px_-20px_rgba(255,255,255,0.08)]">
-            <div className="absolute inset-0 bg-linear-to-tr from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div className="relative mx-auto max-w-[420px] z-10 -mt-4 md:-mt-8 mb-24 perspective-1000">
+          <div className="relative rounded-2xl md:rounded-[2rem] overflow-hidden border border-foreground/10 bg-background/40 backdrop-blur-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_-15px_rgba(255,255,255,0.05)] ring-1 ring-white/10 dark:ring-white/5 transition-transform duration-700 ease-out hover:scale-[1.03] hover:shadow-[0_30px_70px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_30px_70px_-20px_rgba(255,255,255,0.1)]">
+            <div className="absolute inset-0 bg-linear-to-tr from-primary/5 via-transparent to-transparent pointer-events-none z-20" />
             <img 
               src={screenshotSrc} 
               alt={copy.popupScreenshotAlt} 
-              className="w-full h-auto object-cover opacity-90 transition-opacity duration-300 relative z-10" 
+              className="w-full h-auto object-cover opacity-[0.95] transition-opacity duration-300 relative z-10" 
             />
             
             {/* Glass reflection effect */}
-            <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-white/20 to-transparent" />
-            <div className="absolute inset-y-0 left-0 w-px bg-linear-to-b from-white/20 via-transparent to-transparent" />
+            <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-white/30 to-transparent z-20" />
+            <div className="absolute inset-y-0 left-0 w-px bg-linear-to-b from-white/20 via-transparent to-transparent z-20" />
           </div>
 
-          {/* Decorative glow behind the image */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-primary/20 blur-[100px] rounded-full -z-10" />
+          {/* Decorative glow behind the image - made more concentrated for smaller image */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[80%] bg-primary/20 blur-[120px] rounded-full -z-10" />
         </div>
 
         {/* Updated Stats / Inline text below main visual */}
