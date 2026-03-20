@@ -118,8 +118,8 @@ export function HeroShapeGrid({ className }) {
           <div
           className={[
             "absolute inset-0",
-            // 超平滑的渐隐：顶部清晰，向下非常柔和地过渡到完全透明（8%->60%->100%）。
-            "[mask-image:radial-gradient(1100px_700px_at_50%_0%,black_0%,rgba(0,0,0,0.5)_45%,transparent_85%)]",
+            // 超平滑的渐隐：顶部清晰，向下非常柔和地过渡到完全透明
+            "[mask-image:radial-gradient(1100px_800px_at_50%_10%,black_0%,rgba(0,0,0,0.6)_40%,transparent_80%)]",
             "opacity-80",
             "translate-x-[var(--aib-grid-x)] translate-y-[var(--aib-grid-y)]",
             "transition-transform duration-700 ease-out",
