@@ -690,15 +690,6 @@ export function Hero() {
                   {/* Spacer to push everything else down */}
                   <div className="flex-1 min-h-[12px]" />
 
-                  {/* Platforms Row */}
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="w-7 h-7 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center">
-                        <div className="w-4 h-4 rounded-full bg-foreground/10" />
-                      </div>
-                    ))}
-                  </div>
-
                   {/* Input Area with Switch and Send Button */}
                   <div className="mt-1 bg-background rounded-xl border border-border/60 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05),0_1px_3px_-1px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_8px_-2px_rgba(255,255,255,0.02),0_1px_3px_-1px_rgba(255,255,255,0.01)] flex flex-col pt-3 pb-2 px-3 relative overflow-hidden transition-all duration-300 ring-1 ring-border/20">
                     {/* Simulated Text */}
