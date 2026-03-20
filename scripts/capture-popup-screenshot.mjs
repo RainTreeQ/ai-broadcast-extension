@@ -95,7 +95,7 @@ async function setupPage(page) {
       },
       storage: {
         local: {
-          get: async () => ({ autoSend: true, newChat: false, popupDraft: "" }),
+          get: async () => ({ autoSend: true, newChat: false, popupDraft: "", aib_onboarding_completed: true }),
           set: async () => {},
           remove: async () => {},
         },
