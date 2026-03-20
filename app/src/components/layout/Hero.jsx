@@ -634,7 +634,7 @@ export function Hero() {
             </p>
           </div>
 
-          <div className="max-w-6xl mx-auto w-full relative min-h-[450px] lg:aspect-[21/9] rounded-[32px] bg-muted/30 overflow-hidden border border-border/40 shadow-[0_30px_60px_-35px_rgba(0,0,0,0.4)] dark:shadow-[0_20px_60px_-25px_rgba(255,255,255,0.06)] ring-1 ring-white/10 dark:ring-white/5 transition-transform duration-700 hover:scale-[1.01]">
+          <div className="max-w-6xl mx-auto w-full relative min-h-[500px] lg:aspect-[21/9] rounded-[32px] bg-muted/30 overflow-hidden border border-border/40 shadow-[0_30px_60px_-35px_rgba(0,0,0,0.4)] dark:shadow-[0_20px_60px_-25px_rgba(255,255,255,0.06)] ring-1 ring-white/10 dark:ring-white/5 transition-transform duration-700 hover:scale-[1.01]">
             <div className="absolute inset-0 bg-linear-to-b from-primary/5 to-transparent mix-blend-overlay pointer-events-none" />
             {/* Simulated split screen mockup */}
             <div className="absolute inset-x-2 inset-y-2 grid grid-cols-2 lg:grid-cols-4 gap-2">
