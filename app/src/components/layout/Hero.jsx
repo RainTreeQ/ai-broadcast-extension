@@ -645,8 +645,8 @@ export function Hero() {
                 { name: "DeepSeek", width1: "16", width2: "full", width3: "4/5", width4: "" }
               ].map((ai, index) => (
                 <div key={index} className="bg-background/80 backdrop-blur-md flex flex-col relative overflow-hidden rounded-2xl border border-border/50 shadow-sm">
-                  <div className="h-10 bg-muted/40 border-b border-border/40 flex items-center px-4">
-                    <div className="flex gap-1.5 opacity-60">
+                  <div className="h-10 bg-muted/40 border-b border-border/40 flex items-center px-4 relative">
+                    <div className="flex gap-1.5 opacity-60 absolute left-4">
                       <div className="w-2.5 h-2.5 rounded-full bg-foreground/20" />
                       <div className="w-2.5 h-2.5 rounded-full bg-foreground/20" />
                       <div className="w-2.5 h-2.5 rounded-full bg-foreground/20" />
