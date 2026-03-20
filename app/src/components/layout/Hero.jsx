@@ -579,11 +579,13 @@ export function Hero() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 pt-6 items-center justify-center w-full">
-            <Button size="lg" className="h-14 px-8 text-base font-medium rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5" onClick={() => window.open('https://github.com/RainTreeQ/sendol-extension#-installation--安装', '_blank')}>
-              {copy.ctaInstall}
-              <ArrowUpRight className="ml-2 h-5 w-5" />
+            <Button asChild size="lg" className="h-14 px-8 text-base font-medium rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 cursor-pointer">
+              <a href="https://github.com/RainTreeQ/sendol-extension#-installation--安装" target="_blank" rel="noreferrer">
+                {copy.ctaInstall}
+                <ArrowUpRight className="ml-2 h-5 w-5" />
+              </a>
             </Button>
-            <Button variant="outline" size="lg" className="h-14 px-8 text-base font-medium rounded-full bg-background/50 backdrop-blur-sm hover:bg-muted" onClick={(e) => handleScrollTo(e, "pricing")}>
+            <Button variant="outline" size="lg" className="h-14 px-8 text-base font-medium rounded-full bg-background/50 backdrop-blur-sm hover:bg-muted cursor-pointer" onClick={(e) => handleScrollTo(e, "pricing")}>
               {copy.ctaPricing}
             </Button>
           </div>
@@ -770,7 +772,7 @@ export function Hero() {
                 <p className="text-[15px] leading-relaxed text-foreground/80">{copy.communityBody1}</p>
                 <p className="text-[15px] leading-relaxed text-foreground/80">{copy.communityBody2}</p>
               </div>
-              <Button asChild variant="outline" className="w-full mt-auto rounded-xl">
+              <Button asChild variant="outline" className="w-full mt-auto rounded-xl cursor-pointer">
                 <a href="https://github.com/RainTreeQ/sendol-extension" target="_blank" rel="noreferrer">{copy.communityBtn}</a>
               </Button>
             </div>
@@ -793,7 +795,7 @@ export function Hero() {
                 <p className="text-[15px] leading-relaxed text-foreground/90 font-medium">{copy.proBody1}</p>
                 <p className="text-[15px] leading-relaxed text-foreground/80">{copy.proBody2}</p>
               </div>
-              <Button asChild className="w-full mt-auto rounded-xl shadow-md hover:shadow-lg relative z-10">
+              <Button asChild className="w-full mt-auto rounded-xl shadow-md hover:shadow-lg relative z-10 cursor-pointer">
                 <a href="https://github.com/RainTreeQ/sendol-extension/issues" target="_blank" rel="noreferrer">{copy.proBtn}</a>
               </Button>
             </div>
@@ -812,7 +814,7 @@ export function Hero() {
                 <p className="text-[15px] leading-relaxed text-foreground/80">{copy.sponsorBody1}</p>
                 <p className="text-[15px] leading-relaxed text-foreground/80">{copy.sponsorBody2}</p>
               </div>
-              <Button asChild variant="secondary" className="w-full mt-auto rounded-xl bg-secondary/80 hover:bg-secondary">
+              <Button asChild variant="secondary" className="w-full mt-auto rounded-xl bg-secondary/80 hover:bg-secondary cursor-pointer">
                 <a href="https://github.com/sponsors" target="_blank" rel="noreferrer">{copy.sponsorBtn}</a>
               </Button>
             </div>
